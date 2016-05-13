@@ -133,15 +133,15 @@ class MainMenuScreen(private val game: Qixxy)
   override def resume() {}
 
   // enumeration of menu items
-  sealed abstract class Role
-  case object NEW_GAME extends Role
-  case object SETTINGS extends Role
-  case object LEADERBOARD extends Role
-  case object PROFILES extends Role
-  case object HELP extends Role
-  case object EXIT extends Role
+  sealed abstract class MenuRole
+  case object NEW_GAME extends MenuRole
+  case object SETTINGS extends MenuRole
+  case object LEADERBOARD extends MenuRole
+  case object PROFILES extends MenuRole
+  case object HELP extends MenuRole
+  case object EXIT extends MenuRole
 
-  class MenuItem(private val _label: String, val role: Role) {
+  class MenuItem(private val _label: String, val role: MenuRole) {
     def isSelected: Boolean = menuItems.get(selected).eq(this)
     def label: String = if (isSelected) "> " + _label + " <"
                         else _label

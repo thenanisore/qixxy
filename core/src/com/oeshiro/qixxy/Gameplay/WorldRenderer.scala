@@ -39,10 +39,14 @@ class WorldRenderer(private val wController: WorldController)
   def renderWorld(batch: SpriteBatch) {
     camera.update()
     batch.setProjectionMatrix(camera.combined)
+    //shaper.setProjectionMatrix(camera.combined)
+    shaper.setAutoShapeType(true)
 
     batch.begin()
+    shaper.begin()
     wController.field.render(batch, shaper)
     batch.end()
+    shaper.end()
   }
 
   def renderGui(batch: SpriteBatch) {

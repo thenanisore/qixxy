@@ -1,7 +1,10 @@
 package com.oeshiro.qixxy.Gameplay.Objects
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.math.{Rectangle, Vector2, MathUtils}
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math._
+
+import scala.collection.mutable.ArrayBuffer
 
 abstract class AbstractObject {
 
@@ -11,23 +14,52 @@ abstract class AbstractObject {
   var scale = new Vector2(1, 1)
   var rotation = 0.0f
 
-  var velocity = new Vector2
-  var terminalVelocity = new Vector2(1, 1)
-  var friction = new Vector2
+  var velocity = new Vector2()
+  var terminalVelocity = new Vector2(30, 30)
+  var friction = new Vector2(500, 500)
 
-  var acceleration = new Vector2
-  var bounds = new Rectangle
+  var acceleration = new Vector2()
+  var bounds = new Rectangle()
 
-  def update(delta: Float) {
+  def updateMotion(delta: Float) {
     updateMotionX(delta)
     updateMotionY(delta)
+  }
 
-    // move to new position
+  def getNewPosition(delta: Float): Vector2 =
+    new Vector2(
+      position.x + velocity.x * delta,
+      position.y + velocity.y * delta
+    )
+
+  def updatePosition(delta: Float) {
     position.x += velocity.x * delta
     position.y += velocity.y * delta
   }
 
-  def render(batch: SpriteBatch): Unit
+  def update(delta: Float) {
+    updateMotion(delta)
+    updatePosition(delta)
+  }
+
+  def render(batch: SpriteBatch, shaper: ShapeRenderer): Unit
+
+  def isOnAreaBorder(vertices: ArrayBuffer[(Float, Float)], pos: Vector2): Boolean = {
+    var result = true
+    val e = 1
+    for (i <- 0 until vertices.length - 1) {
+      if (Intersector.distanceSegmentPoint(
+        new Vector2(vertices(i)._1, vertices(i)._2),
+        new Vector2(vertices(i + 1)._1, vertices(i + 1)._2),
+        pos) < e
+      )
+        return true
+    }
+    false
+  }
+
+  def isInArea(area: Polygon, pos: Vector2): Boolean =
+    area.contains(pos)
 
   protected def updateMotionX(delta: Float) {
     if (velocity.x != 0) {
