@@ -66,17 +66,11 @@ class WorldController(private val game: Qixxy)
     // movement keys
     if (Gdx.input.isKeyPressed(Keys.LEFT)) {
       field.player.moveLeft()
-    }
-
-    if (Gdx.input.isKeyPressed(Keys.RIGHT) ) {
+    } else if (Gdx.input.isKeyPressed(Keys.RIGHT) ) {
       field.player.moveRight()
-    }
-
-    if (Gdx.input.isKeyPressed(Keys.UP)) {
+    } else if (Gdx.input.isKeyPressed(Keys.UP)) {
       field.player.moveUp()
-    }
-
-    if (Gdx.input.isKeyPressed(Keys.DOWN) ) {
+    } else if (Gdx.input.isKeyPressed(Keys.DOWN) ) {
       field.player.moveDown()
     }
 }

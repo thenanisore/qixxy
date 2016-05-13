@@ -26,11 +26,11 @@ class GameField {
 
   import scala.collection.mutable.ArrayBuffer
   val areaVertices = ArrayBuffer(
-    (MARGIN, MARGIN),
-    (Utils.viewportWidth - UI_MARGIN, MARGIN),
-    (Utils.viewportWidth - UI_MARGIN, Utils.viewportHeight - MARGIN),
-    (MARGIN, Utils.viewportHeight - MARGIN),
-    (MARGIN, MARGIN)
+    (borders.getX, borders.getY),
+    (borders.getX + borders.width, borders.getY),
+    (borders.getX + borders.width, borders.getY + borders.height),
+    (borders.getX, borders.getY + borders.height),
+    (borders.getX, borders.getY)
   )
 
   val area = new Polygon(areaVertices
