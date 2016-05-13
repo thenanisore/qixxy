@@ -46,14 +46,15 @@ abstract class AbstractObject {
 
   def isOnAreaBorder(vertices: ArrayBuffer[(Float, Float)], pos: Vector2): Boolean = {
     var result = true
-    val e = 1
+    val e = 0.5
+    val x, y = new Vector2()
     for (i <- 0 until vertices.length - 1) {
-      if (Intersector.distanceSegmentPoint(
-        new Vector2(vertices(i)._1, vertices(i)._2),
-        new Vector2(vertices(i + 1)._1, vertices(i + 1)._2),
-        pos) < e
-      )
+      x.set(vertices(i)._1, vertices(i)._2)
+      y.set(vertices(i + 1)._1, vertices(i + 1)._2)
+      val distance = Intersector.distanceSegmentPoint(x, y, pos)
+      if (distance < e) {
         return true
+      }
     }
     false
   }
@@ -70,7 +71,7 @@ abstract class AbstractObject {
         velocity.x = Math.min(velocity.x + friction.x * delta, 0)
       }
     }
-    // Apply acceleration
+    // apply acceleration
     velocity.x += acceleration.x * delta
     velocity.x = MathUtils.clamp(velocity.x,
       -terminalVelocity.x, terminalVelocity.x)

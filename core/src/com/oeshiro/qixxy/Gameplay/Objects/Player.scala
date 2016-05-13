@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Array
 
-class Player extends AbstractObject {
+class Player(val field: GameField) extends AbstractObject {
 
   val LOG = classOf[Player].getSimpleName
 
@@ -56,7 +56,7 @@ class Player extends AbstractObject {
     path = new Array[Vector2]()
   }
 
-  def changeDirection(dir: DIRECTION_STATE) {
+  private def changeDirection(dir: DIRECTION_STATE) {
     if (state.isInstanceOf[DRAWING] && dir != direction) {
       direction match {
         case UP | DOWN => isTurned = dir == LEFT || dir == RIGHT
@@ -100,8 +100,9 @@ class Player extends AbstractObject {
 
   private def startDrawing(delta: Float) {
     state = DRAWING_FAST
-    path.add(position.cpy())
+    path.add(field.getExactPoint(position))
     Gdx.app.log(LOG, "state changed to DRAWING")
+    Gdx.app.log(LOG, s"started at ${path.first()}")
   }
 
   private def continueDrawing(delta: Float) {
@@ -113,10 +114,13 @@ class Player extends AbstractObject {
 
   private def finishDrawing(delta: Float) {
     state = NOT_DRAWING
-    path.add(position.cpy())
+    path.add(field.getExactPoint(position))
+    Gdx.app.log(LOG, s"finished at ${path.peek()}")
     isReady = false
-    path.clear()
 
+    field.processPath(path)
+
+    path.clear()
     Gdx.app.log(LOG, "state changed to NOT_DRAWING")
   }
 
@@ -127,7 +131,7 @@ class Player extends AbstractObject {
   }
 
   private def drawPath(shaper: ShapeRenderer) {
-    if (path != null && path.size > 1) {
+    if (path != null) {
       for (i <- 0 until path.size - 1) {
         shaper.line(path.get(i), path.get(i + 1))
       }
@@ -142,12 +146,13 @@ class Player extends AbstractObject {
     }
   }
 
-  def update(delta: Float, field: GameField) {
+  override def update(delta: Float) {
     super.updateMotion(delta)
     val newPos = getNewPosition(delta)
     state match {
       case NOT_DRAWING =>
-        if (isOnAreaBorder(field.areaVertices, newPos)) {
+        if (isOnAreaBorder(field.areaVertices, newPos)
+            && isInArea(field.area, newPos)) {
           super.updatePosition(delta)
           if (isReady) isReady = false
         } else if (isReady && isInArea(field.area, newPos)) {
@@ -160,7 +165,8 @@ class Player extends AbstractObject {
         } else {
           continueDrawing(delta)
         }
-        super.updatePosition(delta)
+        if (isInArea(field.area, newPos))
+          super.updatePosition(delta)
     }
   }
 }

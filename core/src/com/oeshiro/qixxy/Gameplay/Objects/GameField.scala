@@ -3,19 +3,20 @@ package com.oeshiro.qixxy.Gameplay.Objects
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.{Polygon, Rectangle}
+import com.badlogic.gdx.math.{Intersector, Vector2, Polygon, Rectangle}
 import com.badlogic.gdx.utils.Array
 import com.oeshiro.qixxy.Utils
 
+import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConversions._
 
 class GameField {
 
   val LOG = classOf[GameField].getSimpleName
 
-  var player = new Player()
-  var qix = new Qix()
-  var sparxes = new Array[Sparx]()
+  var player: Player = _
+  var qix: Qix = _
+  var sparxes: Array[Sparx] = _
 
   val MARGIN = 10f
   val UI_MARGIN = Utils.viewportWidth * 0.25f + 10f
@@ -24,25 +25,33 @@ class GameField {
     Utils.viewportWidth - UI_MARGIN,
     Utils.viewportHeight - 2f * MARGIN)
 
-  import scala.collection.mutable.ArrayBuffer
-  val areaVertices = ArrayBuffer(
-    (borders.getX, borders.getY),
-    (borders.getX + borders.width, borders.getY),
-    (borders.getX + borders.width, borders.getY + borders.height),
-    (borders.getX, borders.getY + borders.height),
-    (borders.getX, borders.getY)
-  )
+  var areaVertices: ArrayBuffer[(Float, Float)] = _
+  var area: Polygon = _
 
-  val area = new Polygon(areaVertices
-    .flatMap(p => ArrayBuffer(p._1, p._2))
-    .toArray
-  )
+  init()
 
-  Gdx.app.log(LOG, "Level loaded")
-  Gdx.app.log(LOG, area.area().toString)
+  def init() {
+    player = new Player(this)
+    qix = new Qix()
+    sparxes = new Array[Sparx]()
+
+    areaVertices = ArrayBuffer(
+      (borders.getX, borders.getY),
+      (borders.getX + borders.width, borders.getY),
+      (borders.getX + borders.width, borders.getY + borders.height),
+      (borders.getX, borders.getY + borders.height),
+      (borders.getX, borders.getY)
+    )
+
+    area = new Polygon(areaVertices
+      .flatMap(p => ArrayBuffer(p._1, p._2))
+      .toArray)
+
+    Gdx.app.log(LOG, "level loaded")
+  }
 
   def update(delta: Float) {
-    player.update(delta, this)
+    player.update(delta)
     qix.update(delta)
     sparxes foreach (_.update(delta))
   }
@@ -58,5 +67,35 @@ class GameField {
     shaper.setAutoShapeType(true)
     shaper.rect(borders.getX, borders.getY,
       borders.getWidth, borders.getHeight)
+  }
+
+  def processPath(path: Array[Vector2]) {
+
+  }
+
+  def getExactPoint(point: Vector2): Vector2 = {
+    val x, y = new Vector2()
+    var min = Utils.viewportWidth
+    var imin = 0
+    var distance = 0f
+
+    for (i <- 0 until areaVertices.length - 1) {
+      x.set(areaVertices(i)._1, areaVertices(i)._2)
+      y.set(areaVertices(i + 1)._1, areaVertices(i + 1)._2)
+      distance = Intersector.distanceSegmentPoint(x, y, point)
+      if (distance < min) {
+        min = distance
+        imin = i
+      }
+    }
+
+    val result = new Vector2()
+    if (areaVertices(imin)._1 == areaVertices(imin + 1)._1) {
+      result.set(areaVertices(imin)._1, point.y)
+    } else if (areaVertices(imin)._2 == areaVertices(imin + 1)._2) {
+      result.set(point.x, areaVertices(imin)._2)
+    }
+
+    result
   }
 }
