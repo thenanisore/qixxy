@@ -57,13 +57,15 @@ class Player(val field: GameField) extends AbstractObject {
   }
 
   private def changeDirection(dir: DIRECTION_STATE) {
-    if (state.isInstanceOf[DRAWING] && dir != direction) {
-      direction match {
-        case UP | DOWN => isTurned = dir == LEFT || dir == RIGHT
-        case LEFT | RIGHT => isTurned = dir == UP || dir == DOWN
-        case _ =>
+    if (dir != direction) {
+      if (state.isInstanceOf[DRAWING]) {
+        direction match {
+          case UP | DOWN => isTurned = dir == LEFT || dir == RIGHT
+          case LEFT | RIGHT => isTurned = dir == UP || dir == DOWN
+          case _ =>
+        }
+        if (isTurned) Gdx.app.log(LOG, s"turned from $direction to $dir")
       }
-      if (isTurned) Gdx.app.log(LOG, s"turned from $direction to $dir")
       direction = dir
     }
   }

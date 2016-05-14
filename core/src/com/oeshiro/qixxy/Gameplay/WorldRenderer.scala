@@ -18,6 +18,7 @@ class WorldRenderer(private val wController: WorldController)
   private var batch: SpriteBatch = _
 
   init()
+
   Gdx.app.log(LOG, "started")
 
   private def init() {
