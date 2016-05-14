@@ -51,7 +51,8 @@ class WorldController(private val game: Qixxy)
   }
 
   private def handleDebugInput(delta: Float) {
-    if (Gdx.input.isKeyPressed(Keys.SPACE) ) {
+    if (Gdx.input.isKeyPressed(Keys.R)) {
+      init()
     }
   }
 
@@ -72,6 +73,8 @@ class WorldController(private val game: Qixxy)
       field.player.moveUp()
     } else if (Gdx.input.isKeyPressed(Keys.DOWN) ) {
       field.player.moveDown()
+    } else {
+      field.player.stop()
     }
 }
 

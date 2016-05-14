@@ -1,7 +1,6 @@
 package com.oeshiro.qixxy.Gameplay.Objects
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Pixmap.Blending
 import com.badlogic.gdx.graphics.{Texture, Color, Pixmap}
 import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
@@ -87,7 +86,7 @@ class GameField {
 
   def renderArea(polygon: scala.Array[Float], shaper: ShapeRenderer) {
     val pix = new Pixmap(1, 1, Pixmap.Format.RGBA8888)
-    pix.setColor(Color.ORANGE)
+    pix.setColor(Color.BLUE)
     pix.fill()
     pix.setColor(Color.WHITE)
     val textureSolid = new Texture(pix)
@@ -190,12 +189,19 @@ class GameField {
 
   def getExactPoint(point: Vector2): Vector2 = {
     val imin = findNearestSideIndices(point).first()
+    val first = areaVertices.get(imin)
+    val second = areaVertices.get(imin + 1)
 
     val result = new Vector2()
-    if (areaVertices.get(imin).x == areaVertices.get(imin + 1).x) {
-      result.set(areaVertices.get(imin).x, point.y)
-    } else if (areaVertices.get(imin).y == areaVertices.get(imin + 1).y) {
-      result.set(point.x, areaVertices.get(imin).y)
+
+    if (first.x == second.x) {
+      result.set(first.x, MathUtils.clamp(
+        point.y, Math.min(first.y, second.y),
+        Math.max(first.y, second.y)))
+    } else if (first.y == second.y) {
+      result.set(MathUtils.clamp(
+        point.x, Math.min(first.x, second.x),
+        Math.max(first.x, second.x)), first.y)
     }
 
     result

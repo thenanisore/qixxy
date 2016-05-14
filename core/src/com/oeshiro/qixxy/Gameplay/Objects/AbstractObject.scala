@@ -5,8 +5,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math._
 import com.badlogic.gdx.utils.Array
 
-import scala.collection.mutable.ArrayBuffer
-
 abstract class AbstractObject {
 
   var position = new Vector2()
@@ -38,6 +36,10 @@ abstract class AbstractObject {
     position.y += velocity.y * delta
   }
 
+  def updatePosition(newPos: Vector2) {
+    position.set(newPos)
+  }
+
   def update(delta: Float) {
     updateMotion(delta)
     updatePosition(delta)
@@ -45,15 +47,13 @@ abstract class AbstractObject {
 
   def render(batch: SpriteBatch, shaper: ShapeRenderer): Unit
 
-  def isOnAreaBorder(vertices: Array[Vector2], pos: Vector2): Boolean = {
-    var result = true
-    val e = 0.5
+  def isOnAreaBorder(vertices: Array[Vector2], pos: Vector2, e: Float): Boolean = {
     val x, y = new Vector2()
     for (i <- 0 until vertices.size - 1) {
       x.set(vertices.get(i).x, vertices.get(i).y)
       y.set(vertices.get(i + 1).x, vertices.get(i + 1).y)
       val distance = Intersector.distanceSegmentPoint(x, y, pos)
-      if (distance < e) {
+      if (distance <= e) {
         return true
       }
     }

@@ -42,8 +42,8 @@ class Player(val field: GameField) extends AbstractObject {
   init()
 
   def init() {
-    terminalVelocity.set(100, 100)
-    slowVelocity = new Vector2(50, 50)
+    terminalVelocity.set(200, 200)
+    slowVelocity = new Vector2(100, 100)
     currentVelocity = new Vector2(terminalVelocity)
 
     state = NOT_DRAWING
@@ -90,6 +90,10 @@ class Player(val field: GameField) extends AbstractObject {
     changeDirection(DOWN)
   }
 
+  def stop() {
+    velocity.set(0, 0)
+  }
+
   def setSlowVelocity() {
     if (currentVelocity != slowVelocity)
       currentVelocity.set(slowVelocity)
@@ -98,6 +102,11 @@ class Player(val field: GameField) extends AbstractObject {
   def setNormalVelocity() {
     if (currentVelocity != terminalVelocity)
       currentVelocity.set(terminalVelocity)
+  }
+
+  private def resetReady() {
+    if (isReady)
+      isReady = false
   }
 
   private def startDrawing(delta: Float) {
@@ -119,9 +128,7 @@ class Player(val field: GameField) extends AbstractObject {
     path.add(field.getExactPoint(position))
     Gdx.app.log(LOG, s"finished at ${path.peek()}")
     isReady = false
-
     field.processPath(path)
-
     path.clear()
     Gdx.app.log(LOG, "state changed to NOT_DRAWING")
   }
@@ -148,27 +155,37 @@ class Player(val field: GameField) extends AbstractObject {
     }
   }
 
+  private var newPos: Vector2 = _
+  private var onBorder: Boolean = _
+  private var inArea: Boolean = _
+
   override def update(delta: Float) {
+    // calculate new parameters and position
     super.updateMotion(delta)
-    val newPos = getNewPosition(delta)
+    newPos = getNewPosition(delta)
+    onBorder = isOnAreaBorder(field.areaVertices, newPos, 0)
+    inArea = isInArea(field.area, newPos)
+
     state match {
       case NOT_DRAWING =>
-        if (isOnAreaBorder(field.areaVertices, newPos)
-            && isInArea(field.area, newPos)) {
-          super.updatePosition(delta)
-          if (isReady) isReady = false
-        } else if (isReady && isInArea(field.area, newPos)) {
-          startDrawing(delta)
+        if (onBorder) {
+          updatePosition(delta)
+          resetReady()
+        } else {
+          if (inArea && isReady) {
+            startDrawing(delta)
+          } else {
+            updatePosition(field.getExactPoint(newPos))
+          }
         }
 
       case _: DRAWING =>
-        if (isOnAreaBorder(field.areaVertices, newPos)) {
+        if (!inArea || onBorder) {
           finishDrawing(delta)
         } else {
           continueDrawing(delta)
         }
-        if (isInArea(field.area, newPos))
-          super.updatePosition(delta)
+        updatePosition(delta)
     }
   }
 }
