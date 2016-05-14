@@ -70,24 +70,36 @@ class GameField {
   }
 
   def processPath(path: Array[Vector2]) {
-
+    val : (Int, Int)
   }
 
-  def getExactPoint(point: Vector2): Vector2 = {
+  def findNearestSideIndex(points: Vector2*): Array[Int] = {
     val x, y = new Vector2()
-    var min = Utils.viewportWidth
-    var imin = 0
+    val mins = new Array[Float]
+    val imins = new Array[Int]
+    0 until points.size foreach (_ => {
+      mins.add(Utils.viewportWidth)
+      imins.add(0)
+    })
     var distance = 0f
 
     for (i <- 0 until areaVertices.length - 1) {
       x.set(areaVertices(i)._1, areaVertices(i)._2)
       y.set(areaVertices(i + 1)._1, areaVertices(i + 1)._2)
-      distance = Intersector.distanceSegmentPoint(x, y, point)
-      if (distance < min) {
-        min = distance
-        imin = i
+      for (j <- 0 until mins.size) {
+        distance = Intersector.distanceSegmentPoint(x, y, points.get(j))
+        if (distance < mins.get(j)) {
+          mins.set(j, distance)
+          imins.set(j, i)
+        }
       }
     }
+
+    imins
+  }
+
+  def getExactPoint(point: Vector2): Vector2 = {
+    val imin = findNearestSideIndex(point).first()
 
     val result = new Vector2()
     if (areaVertices(imin)._1 == areaVertices(imin + 1)._1) {
