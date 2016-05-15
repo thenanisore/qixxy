@@ -4,10 +4,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math._
 import com.badlogic.gdx.utils.Array
+import com.oeshiro.qixxy.Utils
 
-import scala.collection.JavaConversions._
-
-abstract class AbstractObject {
+abstract class AbstractObject(val field: GameField) {
 
   val size: Float
 
@@ -24,6 +23,9 @@ abstract class AbstractObject {
   var acceleration = new Vector2()
   var bounds = new Rectangle()
 
+  val pathMargin: Float
+  val borderMargin: Float
+
   def updateMotion(delta: Float) {
     updateMotionX(delta)
     updateMotionY(delta)
@@ -35,18 +37,20 @@ abstract class AbstractObject {
       position.y + velocity.y * delta
     )
 
-  def updatePosition(delta: Float) {
+  def updatePosition(delta: Float, needAlign: Boolean) {
     position.x += velocity.x * delta
     position.y += velocity.y * delta
+    if (needAlign) align
   }
 
-  def updatePosition(newPos: Vector2) {
+  def updatePosition(newPos: Vector2, needAlign: Boolean) {
     position.set(newPos)
+    if (needAlign) align
   }
 
   def update(delta: Float) {
     updateMotion(delta)
-    updatePosition(delta)
+    updatePosition(delta, false)
   }
 
   def render(batch: SpriteBatch, shaper: ShapeRenderer): Unit
@@ -81,6 +85,25 @@ abstract class AbstractObject {
     false
   }
 
+  protected def isNearVertex: Int = {
+    var imin = -1
+    var min = Utils.viewportWidth
+    for (i <- 0 until field.areaVertices.size - 1) {
+      val dist = field.areaVertices.get(i).dst2(position)
+      if (dist < min && dist < Math.pow(borderMargin, 2)) {
+        imin = i
+        min = dist
+      }
+    }
+    imin
+  }
+
+  protected def align() {
+    if (velocity.x != 0 || velocity.y != 0) return
+    val i = isNearVertex
+    if (i != -1)
+      position.set(field.areaVertices.get(i))
+  }
 
   protected def updateMotionX(delta: Float) {
     if (velocity.x != 0) {

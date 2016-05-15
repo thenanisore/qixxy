@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Array
 
-class Player(val field: GameField) extends AbstractObject {
+class Player(field: GameField) extends AbstractObject(field) {
 
   val LOG = classOf[Player].getSimpleName
 
@@ -26,7 +26,10 @@ class Player(val field: GameField) extends AbstractObject {
   case object LEFT extends DIRECTION_STATE
 
   // parameters
-  val size = 5f
+  val size = 8f
+  val speed = 500
+  val pathMargin = 1.2f * size
+  val borderMargin = size
   var state: PLAYER_STATE = _
   var direction: DIRECTION_STATE = _
   var isAlive: Boolean = _
@@ -47,8 +50,8 @@ class Player(val field: GameField) extends AbstractObject {
   init()
 
   def init() {
-    terminalVelocity.set(200, 200)
-    slowVelocity = new Vector2(100, 100)
+    terminalVelocity.set(speed, speed)
+    slowVelocity = terminalVelocity.scl(0.5f)
     currentVelocity = new Vector2(terminalVelocity)
 
     state = NOT_DRAWING
@@ -144,14 +147,15 @@ class Player(val field: GameField) extends AbstractObject {
     }
   }
 
-  private def finishDrawing(delta: Float) {
+  private def finishDrawing(delta: Float, newPos: Vector2) {
     state = NOT_DRAWING
-    path.add(field.getExactPoint(position))
+    field.alignPath(path, newPos)
     Gdx.app.log(LOG, s"finished at ${path.peek()}")
-    isReady = false
-    updatePosition(path.peek())
+    updatePosition(path.peek(), true)
     field.processPath(path)
     path.clear()
+    isReady = false
+    stop()
     Gdx.app.log(LOG, "state changed to NOT_DRAWING")
     Gdx.app.log(LOG, s"now areas: ${field.claimedAreas.size}")
   }
@@ -180,39 +184,46 @@ class Player(val field: GameField) extends AbstractObject {
 
   override def update(delta: Float) {
     // calculate new parameters and position
-    super.updateMotion(delta)
     newPos = getNewPosition(delta)
-    onBorder = isOnAreaBorder(field.areaVertices, newPos, 0.01f)
-    isNearBorder = isOnAreaBorder(field.areaVertices, newPos, size)
+    onBorder = isOnAreaBorder(field.areaVertices, newPos, 0.1f)
+    isNearBorder = isOnAreaBorder(field.areaVertices, newPos, 0.75f * velocity.len() * delta)
+    val nearestVertex = isNearVertex
     inArea = isInArea(field.area, newPos)
 
     state match {
       case NOT_DRAWING =>
-        if (onBorder) {
-          updatePosition(delta)
+        if (onBorder || isNearBorder) {
+          if (isNearBorder)
+            newPos = field.getExactPoint(newPos)
+          updatePosition(newPos, true)
           resetReady()
         } else {
           if (isReady && inArea) {
-            updatePosition(delta)
+            Gdx.app.log(LOG, s"position old $newPos")
+            updatePosition(delta, true)
             startDrawing(delta)
           } else {
-            updatePosition(field.getExactPoint(newPos))
+            updatePosition(field.getExactPoint(newPos), true)
             resetReady()
           }
         }
 
       case _: DRAWING =>
         // check if try to close a new area
-        if (!inArea || isNearBorder) {
-          finishDrawing(delta)
+        if ((!inArea || onBorder
+                || (nearestVertex != -1
+                    && field.areaVertices.get(nearestVertex) != path.first()))
+             && path.first().dst2(newPos) > Math.pow(borderMargin, 2)) {
+          Gdx.app.log(LOG, borderMargin.toString)
+          finishDrawing(delta, newPos)
         } else {
           continueDrawing(delta)
         }
 
         // check if cross the current path or is too close
-        if (!isOnAreaBorder(path, newPos, size * 0.75f)(path.size - 2)
+        if (!isOnAreaBorder(path, newPos, pathMargin)(path.size - 2)
             && !isCrossPath(path, newPos)(path.size - 2)) {
-          updatePosition(delta)
+          updatePosition(delta, true)
         }
     }
   }

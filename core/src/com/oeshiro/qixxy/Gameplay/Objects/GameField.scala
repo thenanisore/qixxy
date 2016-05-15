@@ -52,7 +52,7 @@ class GameField extends Disposable {
     initTextures(Color.BLUE, Color.ORANGE)
 
     player = new Player(this)
-    qix = new Qix()
+    qix = new Qix(this)
     sparxes = new Array[Sparx]()
 
     Gdx.app.log(LOG, "level loaded")
@@ -79,7 +79,6 @@ class GameField extends Disposable {
     qix.update(delta)
     sparxes foreach (_.update(delta))
   }
-
 
   def render(batch: SpriteBatch,
              shaper: ShapeRenderer,
@@ -119,18 +118,47 @@ class GameField extends Disposable {
     shaper.polygon(polygon)
   }
 
-  def processPath(path: Array[Vector2]) {
-    // align the last segment just in case
-    val dif_x = Math.abs(path.peek().x - path.get(path.size - 2).x)
-    val dif_y = Math.abs(path.peek().y - path.get(path.size - 2).y)
-    if (dif_x != 0 && dif_y != 0) {
-      if (dif_x < dif_y) {
-        path.get(path.size - 2).x = path.peek().x
-      } else {
-        path.get(path.size - 2).y = path.peek().y
+  private def findNearestVertex(pos: Vector2): Int = {
+    var imin = 0
+    var dist, min = Utils.viewportWidth
+    for (i <- 0 until areaVertices.size) {
+      dist = areaVertices.get(i).dst2(pos)
+      if (dist < min) {
+        min = dist
+        imin = i
       }
     }
+    imin
+  }
 
+  def alignPath(path: Array[Vector2], pos: Vector2) {
+    val last = getExactPoint(pos)
+    val imin = findNearestVertex(last)
+    if (!pos.epsilonEquals(last, 0.01f) && areaVertices.get(imin).dst2(pos) < Math.pow(0.5f * player.size, 2)) {
+      val dif_x = Math.abs(areaVertices.get(imin).x - pos.x)
+      val dif_y = Math.abs(areaVertices.get(imin).y - pos.y)
+      if (path.peek().x == pos.x) {
+        last.x = areaVertices.get(imin).x
+        path.peek().x = last.x
+      } else {
+        last.y = areaVertices.get(imin).y
+        path.peek().y = last.y
+      }
+    }
+    // align the last segment just in case
+    val dif_x = Math.abs(last.x - path.peek().x)
+    val dif_y = Math.abs(last.y - path.peek().y)
+    if (dif_x != 0 && dif_y != 0) {
+      if (dif_x < dif_y) {
+        path.peek().x = last.x
+      } else {
+        path.peek().y = last.y
+      }
+    }
+    path.add(last)
+  }
+
+  def processPath(path: Array[Vector2]) {
     val i_s = findNearestSideIndices(path.first(), path.peek())
     val first_i = i_s.get(0)
     val last_i = i_s.get(1)
