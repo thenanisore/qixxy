@@ -2,7 +2,7 @@ package com.oeshiro.qixxy.Gameplay
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.{PolygonSpriteBatch, SpriteBatch}
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.utils.Disposable
 import com.oeshiro.qixxy.Utils
@@ -12,10 +12,11 @@ class WorldRenderer(private val wController: WorldController)
 
   val LOG = classOf[WorldRenderer].getSimpleName
 
-  private var cameraGUI: OrthographicCamera = _
-  private var camera: OrthographicCamera = _
-  private var shaper: ShapeRenderer = _
-  private var batch: SpriteBatch = _
+  var cameraGUI: OrthographicCamera = _
+  var camera: OrthographicCamera = _
+  var shaper: ShapeRenderer = _
+  var polygonBatch: PolygonSpriteBatch = _
+  var batch: SpriteBatch = _
 
   init()
 
@@ -24,6 +25,7 @@ class WorldRenderer(private val wController: WorldController)
   private def init() {
     batch = new SpriteBatch()
     shaper = new ShapeRenderer()
+    polygonBatch = new PolygonSpriteBatch()
     camera = new OrthographicCamera(
       Utils.viewportGuiWidth, Utils.viewportGuiHeight)
     camera.update()
@@ -40,14 +42,15 @@ class WorldRenderer(private val wController: WorldController)
   def renderWorld(batch: SpriteBatch) {
     camera.update()
     batch.setProjectionMatrix(camera.combined)
-    //shaper.setProjectionMatrix(camera.combined)
     shaper.setAutoShapeType(true)
 
     batch.begin()
     shaper.begin()
-    wController.field.render(batch, shaper)
-    batch.end()
+    polygonBatch.begin()
+    wController.field.render(batch, shaper, polygonBatch)
+    polygonBatch.end()
     shaper.end()
+    batch.end()
   }
 
   def renderGui(batch: SpriteBatch) {
@@ -65,5 +68,6 @@ class WorldRenderer(private val wController: WorldController)
   override def dispose() {
     batch.dispose()
     shaper.dispose()
+    polygonBatch.dispose()
   }
 }

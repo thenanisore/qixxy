@@ -79,6 +79,6 @@ class WorldController(private val game: Qixxy)
 }
 
   override def dispose() {
-
+    // TODO: DISPOSE
   }
 }

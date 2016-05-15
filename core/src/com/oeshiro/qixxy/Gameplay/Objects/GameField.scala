@@ -33,21 +33,20 @@ class GameField {
   init()
 
   def init() {
-    player = new Player(this)
-    qix = new Qix()
-    sparxes = new Array[Sparx]()
-
     claimedAreas = new Array[Array[Vector2]]()
     areaVertices = new Array[Vector2]()
     areaVertices.addAll(
-      new Vector2(borders.getX, borders.getY),
-      new Vector2(borders.getX + borders.width, borders.getY),
-      new Vector2(borders.getX + borders.width, borders.getY + borders.height),
-      new Vector2(borders.getX, borders.getY + borders.height),
-      new Vector2(borders.getX, borders.getY)
+    new Vector2(borders.getX, borders.getY),
+    new Vector2(borders.getX + borders.width, borders.getY),
+    new Vector2(borders.getX + borders.width, borders.getY + borders.height),
+    new Vector2(borders.getX, borders.getY + borders.height),
+    new Vector2(borders.getX, borders.getY)
     )
-
     area = getPolygonFromVertices(areaVertices)
+
+    player = new Player(this)
+    qix = new Qix()
+    sparxes = new Array[Sparx]()
 
     Gdx.app.log(LOG, "level loaded")
   }
@@ -64,27 +63,31 @@ class GameField {
     sparxes foreach (_.update(delta))
   }
 
-  def render(batch: SpriteBatch, shaper: ShapeRenderer) {
-    renderBackground(shaper)
+  def render(batch: SpriteBatch,
+             shaper: ShapeRenderer,
+             polygonBatch: PolygonSpriteBatch) {
+    renderBackground(shaper, polygonBatch)
     player.render(batch, shaper)
     qix.render(batch, shaper)
     sparxes foreach (_.render(batch, shaper))
   }
 
-  def renderBackground(shaper: ShapeRenderer) {
+  def renderBackground(shaper: ShapeRenderer,
+                       polygonBatch: PolygonSpriteBatch) {
     shaper.setAutoShapeType(true)
     shaper.rect(borders.getX, borders.getY,
       borders.getWidth, borders.getHeight)
 
     claimedAreas foreach (area => {
-      renderArea(getFloatArray(area), shaper)
+      renderArea(getFloatArray(area), shaper, polygonBatch)
     })
   }
 
   private val triangulator = new EarClippingTriangulator()
-  private val polygonSpriteBatch = new PolygonSpriteBatch()
 
-  def renderArea(polygon: scala.Array[Float], shaper: ShapeRenderer) {
+  def renderArea(polygon: scala.Array[Float],
+                 shaper: ShapeRenderer,
+                 polygonBatch: PolygonSpriteBatch) {
     val pix = new Pixmap(1, 1, Pixmap.Format.RGBA8888)
     pix.setColor(Color.BLUE)
     pix.fill()
@@ -95,9 +98,7 @@ class GameField {
       triangulator.computeTriangles(polygon).toArray
     )
     val poly = new PolygonSprite(polyReg)
-    polygonSpriteBatch.begin()
-    poly.draw(polygonSpriteBatch)
-    polygonSpriteBatch.end()
+    poly.draw(polygonBatch)
     shaper.polygon(polygon)
   }
 

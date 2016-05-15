@@ -5,7 +5,11 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math._
 import com.badlogic.gdx.utils.Array
 
+import scala.collection.JavaConversions._
+
 abstract class AbstractObject {
+
+  val size: Float
 
   var position = new Vector2()
   var dimension = new Vector2(1, 1)
@@ -47,11 +51,12 @@ abstract class AbstractObject {
 
   def render(batch: SpriteBatch, shaper: ShapeRenderer): Unit
 
-  def isOnAreaBorder(vertices: Array[Vector2], pos: Vector2, e: Float): Boolean = {
+  def isOnAreaBorder(vertices: Array[Vector2], pos: Vector2, e: Float)
+                    (implicit last_i: Int = vertices.size - 1): Boolean = {
     val x, y = new Vector2()
-    for (i <- 0 until vertices.size - 1) {
-      x.set(vertices.get(i).x, vertices.get(i).y)
-      y.set(vertices.get(i + 1).x, vertices.get(i + 1).y)
+    for (i <- 0 until last_i) {
+      x.set(vertices.get(i))
+      y.set(vertices.get(i + 1))
       val distance = Intersector.distanceSegmentPoint(x, y, pos)
       if (distance <= e) {
         return true
@@ -62,6 +67,20 @@ abstract class AbstractObject {
 
   def isInArea(area: Polygon, pos: Vector2): Boolean =
     area.contains(pos)
+
+  def isCrossPath(path: Array[Vector2], newPos: Vector2)
+                 (implicit last_i: Int = path.size - 1): Boolean = {
+    val x, y, inter = new Vector2()
+    for (i <- 0 until last_i) {
+      x.set(path.get(i))
+      y.set(path.get(i + 1))
+      if (y != position && Intersector.intersectSegments(x, y, position, newPos, inter)) {
+        return true
+      }
+    }
+    false
+  }
+
 
   protected def updateMotionX(delta: Float) {
     if (velocity.x != 0) {
@@ -92,4 +111,5 @@ abstract class AbstractObject {
     velocity.y = MathUtils.clamp(velocity.y,
       -terminalVelocity.y, terminalVelocity.y)
   }
+
 }

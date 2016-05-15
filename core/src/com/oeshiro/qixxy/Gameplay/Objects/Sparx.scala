@@ -7,4 +7,6 @@ class Sparx extends AbstractObject {
   override def render(batch: SpriteBatch, shaper: ShapeRenderer) {
 
   }
+
+  override val size: Float = 5
 }

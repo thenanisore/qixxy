@@ -27,12 +27,12 @@ class Player(val field: GameField) extends AbstractObject {
 
   // parameters
   val size = 5f
-
   var state: PLAYER_STATE = _
   var direction: DIRECTION_STATE = _
   var isAlive: Boolean = _
   var isReady: Boolean = _
   var isTurned: Boolean = _
+  var isBack: Boolean = _
 
   var slowVelocity: Vector2 = _
   var currentVelocity: Vector2 = _
@@ -51,7 +51,9 @@ class Player(val field: GameField) extends AbstractObject {
     isAlive = true
     isReady = false
     isTurned = false
-    position.set(10, 10)
+    isBack = false
+    position.set(field.areaVertices.get(0).x,
+      (field.areaVertices.get(0).y + field.areaVertices.get(1).y)/ 2f )
 
     path = new Array[Vector2]()
   }
@@ -60,9 +62,23 @@ class Player(val field: GameField) extends AbstractObject {
     if (dir != direction) {
       if (state.isInstanceOf[DRAWING]) {
         direction match {
-          case UP | DOWN => isTurned = dir == LEFT || dir == RIGHT
-          case LEFT | RIGHT => isTurned = dir == UP || dir == DOWN
-          case _ =>
+          case UP =>
+            isTurned = dir == LEFT || dir == RIGHT
+            isBack = dir == DOWN
+          case DOWN =>
+            isTurned = dir == LEFT || dir == RIGHT
+            isBack = dir == UP
+          case LEFT =>
+            isTurned = dir == UP || dir == DOWN
+            isBack = dir == RIGHT
+          case RIGHT =>
+            isTurned = dir == UP || dir == DOWN
+            isBack = dir == LEFT
+        }
+        if (isBack) {
+          stop()
+          isBack = false
+          return
         }
         if (isTurned) Gdx.app.log(LOG, s"turned from $direction to $dir")
       }
@@ -180,12 +196,18 @@ class Player(val field: GameField) extends AbstractObject {
         }
 
       case _: DRAWING =>
+        // check if try to close a new area
         if (!inArea || onBorder) {
           finishDrawing(delta)
         } else {
           continueDrawing(delta)
         }
-        updatePosition(delta)
+
+        // check if cross the current path or is too close
+        if (!isOnAreaBorder(path, newPos, size)(path.size - 2)
+            && !isCrossPath(path, newPos)(path.size - 2)) {
+          updatePosition(delta)
+        }
     }
   }
 }
