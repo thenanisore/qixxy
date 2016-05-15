@@ -5,13 +5,13 @@ import com.badlogic.gdx.graphics.{Texture, Color, Pixmap}
 import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math._
-import com.badlogic.gdx.utils.Array
+import com.badlogic.gdx.utils.{Disposable, Array}
 import com.oeshiro.qixxy.Utils
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConversions._
 
-class GameField {
+class GameField extends Disposable {
 
   val LOG = classOf[GameField].getSimpleName
 
@@ -30,25 +30,42 @@ class GameField {
   var area: Polygon = _
   var claimedAreas: Array[Array[Vector2]] = _
 
+  val triangulator = new EarClippingTriangulator()
+  var pix: Pixmap = _
+  var textureFast: Texture = _
+  var textureSlow: Texture = _
+
   init()
 
   def init() {
     claimedAreas = new Array[Array[Vector2]]()
     areaVertices = new Array[Vector2]()
     areaVertices.addAll(
-    new Vector2(borders.getX, borders.getY),
-    new Vector2(borders.getX + borders.width, borders.getY),
-    new Vector2(borders.getX + borders.width, borders.getY + borders.height),
-    new Vector2(borders.getX, borders.getY + borders.height),
-    new Vector2(borders.getX, borders.getY)
+      new Vector2(borders.getX, borders.getY),
+      new Vector2(borders.getX + borders.width, borders.getY),
+      new Vector2(borders.getX + borders.width, borders.getY + borders.height),
+      new Vector2(borders.getX, borders.getY + borders.height),
+      new Vector2(borders.getX, borders.getY)
     )
     area = getPolygonFromVertices(areaVertices)
+
+    initTextures(Color.BLUE, Color.ORANGE)
 
     player = new Player(this)
     qix = new Qix()
     sparxes = new Array[Sparx]()
 
     Gdx.app.log(LOG, "level loaded")
+  }
+
+  private def initTextures(colorFast: Color, colorSlow: Color) {
+    pix = new Pixmap(1, 1, Pixmap.Format.RGBA8888)
+    pix.setColor(colorFast)
+    pix.fill()
+    textureFast = new Texture(pix)
+    pix.setColor(colorSlow)
+    pix.fill()
+    textureSlow = new Texture(pix)
   }
 
   private def getPolygonFromVertices(vertices: Array[Vector2]): Polygon =
@@ -83,17 +100,13 @@ class GameField {
     })
   }
 
-  private val triangulator = new EarClippingTriangulator()
-
   def renderArea(polygon: scala.Array[Float],
                  shaper: ShapeRenderer,
-                 polygonBatch: PolygonSpriteBatch) {
-    val pix = new Pixmap(1, 1, Pixmap.Format.RGBA8888)
-    pix.setColor(Color.BLUE)
-    pix.fill()
-    pix.setColor(Color.WHITE)
-    val textureSolid = new Texture(pix)
-    val polyReg = new PolygonRegion(new TextureRegion(textureSolid),
+                 polygonBatch: PolygonSpriteBatch,
+                 isSlowArea: Boolean = false) {
+    val polyReg = new PolygonRegion(new TextureRegion(
+      if (isSlowArea) textureSlow
+                 else textureFast),
       polygon.toSeq.toArray,
       triangulator.computeTriangles(polygon).toArray
     )
@@ -206,5 +219,11 @@ class GameField {
     }
 
     result
+  }
+
+  override def dispose() {
+    pix.dispose()
+    textureFast.dispose()
+    textureSlow.dispose()
   }
 }
