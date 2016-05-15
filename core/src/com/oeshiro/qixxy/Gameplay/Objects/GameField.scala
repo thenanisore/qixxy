@@ -29,6 +29,7 @@ class GameField extends Disposable {
   var areaVertices: Array[Vector2] = _
   var area: Polygon = _
   var claimedAreas: Array[Array[Vector2]] = _
+  var claimedAreaTypes: Array[Boolean] = _
 
   val triangulator = new EarClippingTriangulator()
   var pix: Pixmap = _
@@ -39,6 +40,7 @@ class GameField extends Disposable {
 
   def init() {
     claimedAreas = new Array[Array[Vector2]]()
+    claimedAreaTypes = new Array[Boolean]()
     areaVertices = new Array[Vector2]()
     areaVertices.addAll(
       new Vector2(borders.getX, borders.getY),
@@ -95,9 +97,11 @@ class GameField extends Disposable {
     shaper.rect(borders.getX, borders.getY,
       borders.getWidth, borders.getHeight)
 
-    claimedAreas foreach (area => {
-      renderArea(getFloatArray(area), shaper, polygonBatch)
-    })
+    (0 until claimedAreas.size) foreach { i =>
+      renderArea(getFloatArray(claimedAreas.get(i)),
+        shaper, polygonBatch, claimedAreaTypes.get(i))
+    }
+
     shaper.setColor(Color.RED)
     shaper.polygon(getFloatArray(areaVertices))
     shaper.setColor(Color.WHITE)
@@ -158,7 +162,7 @@ class GameField extends Disposable {
     path.add(last)
   }
 
-  def processPath(path: Array[Vector2]) {
+  def processPath(path: Array[Vector2], isSlow: Boolean) {
     val i_s = findNearestSideIndices(path.first(), path.peek())
     val first_i = i_s.get(0)
     val last_i = i_s.get(1)
@@ -200,7 +204,9 @@ class GameField extends Disposable {
     val a2 = getPolygonFromVertices(p_second).area()
     val minArea = if (a1 < a2) p_first else p_second
     val maxArea = if (a1 > a2) p_first else p_second
+
     claimedAreas.add(minArea)
+    claimedAreaTypes.add(isSlow)
     areaVertices = maxArea
     area = getPolygonFromVertices(areaVertices)
 

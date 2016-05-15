@@ -58,10 +58,17 @@ class WorldController(private val game: Qixxy)
 
   private def handleInput(delta: Float) {
     if ((Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)
-          || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT)))
+      || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT)))
     {
       field.player.isReady = true
+      field.player.setFastMode()
+    } else if (Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)
+            || Gdx.input.isKeyPressed(Keys.CONTROL_RIGHT))
+    {
+      field.player.isReady = true
+      field.player.setSlowMode()
     }
+
 
     // movement keys
     if (Gdx.input.isKeyPressed(Keys.LEFT)) {

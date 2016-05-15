@@ -27,13 +27,15 @@ class Player(field: GameField) extends AbstractObject(field) {
 
   // parameters
   val size = 8f
-  val speed = 500
+  val speed = 250
   val pathMargin = 1.2f * size
   val borderMargin = size
   var state: PLAYER_STATE = _
   var direction: DIRECTION_STATE = _
   var isAlive: Boolean = _
   var isReady: Boolean = _
+  var isSlow: Boolean = _
+  var isFast: Boolean = _
   var isTurned: Boolean = _
   var isBack: Boolean = _
 
@@ -51,7 +53,7 @@ class Player(field: GameField) extends AbstractObject(field) {
 
   def init() {
     terminalVelocity.set(speed, speed)
-    slowVelocity = terminalVelocity.scl(0.5f)
+    slowVelocity = new Vector2(terminalVelocity).scl(0.3f)
     currentVelocity = new Vector2(terminalVelocity)
 
     state = NOT_DRAWING
@@ -60,10 +62,26 @@ class Player(field: GameField) extends AbstractObject(field) {
     isReady = false
     isTurned = false
     isBack = false
+    isSlow = false
+    isFast = true
     position.set(field.areaVertices.get(0).x,
       (field.areaVertices.get(0).y + field.areaVertices.get(1).y)/ 2f )
 
     path = new Array[Vector2]()
+  }
+
+  def setSlowMode() {
+    if (state != DRAWING_FAST) {
+      isSlow = true
+      if (state == DRAWING_SLOW)
+        setSlowVelocity()
+    }
+  }
+
+  def setFastMode() {
+    isFast = true
+    if (state == DRAWING_SLOW) state = DRAWING_FAST
+    setNormalVelocity()
   }
 
   private def changeDirection(dir: DIRECTION_STATE) {
@@ -133,28 +151,48 @@ class Player(field: GameField) extends AbstractObject(field) {
       isReady = false
   }
 
+  private def resetSlow() {
+    if (isSlow) {
+      isSlow = false
+      setNormalVelocity()
+    }
+  }
+
+  private def resetFast() {
+    if (isFast)
+      isFast = false
+  }
+
   private def startDrawing(delta: Float) {
-    state = DRAWING_FAST
+    state = if (isSlow) {
+      setSlowVelocity()
+      DRAWING_SLOW
+    } else {
+      setNormalVelocity()
+      DRAWING_FAST
+    }
     path.add(field.getExactPoint(position))
     Gdx.app.log(LOG, "state changed to DRAWING")
     Gdx.app.log(LOG, s"started at ${path.first()}")
   }
 
   private def continueDrawing(delta: Float) {
-    if (isTurned) {
+    if (isTurned && isReady) {
       path.add(position.cpy())
+      Gdx.app.log(LOG, s"add $position")
       isTurned = false
     }
   }
 
   private def finishDrawing(delta: Float, newPos: Vector2) {
-    state = NOT_DRAWING
     field.alignPath(path, newPos)
     Gdx.app.log(LOG, s"finished at ${path.peek()}")
     updatePosition(path.peek(), true)
-    field.processPath(path)
+    field.processPath(path, state == DRAWING_SLOW)
+    state = NOT_DRAWING
     path.clear()
     isReady = false
+    resetSlow()
     stop()
     Gdx.app.log(LOG, "state changed to NOT_DRAWING")
     Gdx.app.log(LOG, s"now areas: ${field.claimedAreas.size}")
@@ -220,8 +258,8 @@ class Player(field: GameField) extends AbstractObject(field) {
         }
 
         // check if cross the current path or is too close
-        if (!isOnAreaBorder(path, newPos, pathMargin)(path.size - 2)
-            && !isCrossPath(path, newPos)(path.size - 2)) {
+        if (!isOnAreaBorder(path, newPos, pathMargin)(path.size - 3)
+            && !isCrossPath(path, newPos)(path.size - 3)) {
           updatePosition(delta, true)
         }
     }
