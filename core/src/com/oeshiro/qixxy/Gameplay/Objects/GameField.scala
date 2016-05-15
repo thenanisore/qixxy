@@ -80,6 +80,7 @@ class GameField extends Disposable {
     sparxes foreach (_.update(delta))
   }
 
+
   def render(batch: SpriteBatch,
              shaper: ShapeRenderer,
              polygonBatch: PolygonSpriteBatch) {
@@ -98,6 +99,9 @@ class GameField extends Disposable {
     claimedAreas foreach (area => {
       renderArea(getFloatArray(area), shaper, polygonBatch)
     })
+    shaper.setColor(Color.RED)
+    shaper.polygon(getFloatArray(areaVertices))
+    shaper.setColor(Color.WHITE)
   }
 
   def renderArea(polygon: scala.Array[Float],
@@ -116,6 +120,17 @@ class GameField extends Disposable {
   }
 
   def processPath(path: Array[Vector2]) {
+    // align the last segment just in case
+    val dif_x = Math.abs(path.peek().x - path.get(path.size - 2).x)
+    val dif_y = Math.abs(path.peek().y - path.get(path.size - 2).y)
+    if (dif_x != 0 && dif_y != 0) {
+      if (dif_x < dif_y) {
+        path.get(path.size - 2).x = path.peek().x
+      } else {
+        path.get(path.size - 2).y = path.peek().y
+      }
+    }
+
     val i_s = findNearestSideIndices(path.first(), path.peek())
     val first_i = i_s.get(0)
     val last_i = i_s.get(1)
@@ -150,8 +165,8 @@ class GameField extends Disposable {
         p_second.addAll(getPath(first_i + 1, first_i))
         p_second.add(path.get(0))
       }
-
     }
+
     // TODO REWRITE
     val a1 = getPolygonFromVertices(p_first).area()
     val a2 = getPolygonFromVertices(p_second).area()

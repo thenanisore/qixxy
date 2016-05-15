@@ -34,6 +34,11 @@ class Player(val field: GameField) extends AbstractObject {
   var isTurned: Boolean = _
   var isBack: Boolean = _
 
+  private var newPos: Vector2 = _
+  private var onBorder: Boolean = _
+  private var isNearBorder: Boolean = _
+  private var inArea: Boolean = _
+
   var slowVelocity: Vector2 = _
   var currentVelocity: Vector2 = _
 
@@ -144,9 +149,11 @@ class Player(val field: GameField) extends AbstractObject {
     path.add(field.getExactPoint(position))
     Gdx.app.log(LOG, s"finished at ${path.peek()}")
     isReady = false
+    updatePosition(path.peek())
     field.processPath(path)
     path.clear()
     Gdx.app.log(LOG, "state changed to NOT_DRAWING")
+    Gdx.app.log(LOG, s"now areas: ${field.claimedAreas.size}")
   }
 
   private def drawPlayer(shaper: ShapeRenderer) {
@@ -171,15 +178,12 @@ class Player(val field: GameField) extends AbstractObject {
     }
   }
 
-  private var newPos: Vector2 = _
-  private var onBorder: Boolean = _
-  private var inArea: Boolean = _
-
   override def update(delta: Float) {
     // calculate new parameters and position
     super.updateMotion(delta)
     newPos = getNewPosition(delta)
-    onBorder = isOnAreaBorder(field.areaVertices, newPos, 0)
+    onBorder = isOnAreaBorder(field.areaVertices, newPos, 0.01f)
+    isNearBorder = isOnAreaBorder(field.areaVertices, newPos, size)
     inArea = isInArea(field.area, newPos)
 
     state match {
@@ -188,23 +192,25 @@ class Player(val field: GameField) extends AbstractObject {
           updatePosition(delta)
           resetReady()
         } else {
-          if (inArea && isReady) {
+          if (isReady && inArea) {
+            updatePosition(delta)
             startDrawing(delta)
           } else {
             updatePosition(field.getExactPoint(newPos))
+            resetReady()
           }
         }
 
       case _: DRAWING =>
         // check if try to close a new area
-        if (!inArea || onBorder) {
+        if (!inArea || isNearBorder) {
           finishDrawing(delta)
         } else {
           continueDrawing(delta)
         }
 
         // check if cross the current path or is too close
-        if (!isOnAreaBorder(path, newPos, size)(path.size - 2)
+        if (!isOnAreaBorder(path, newPos, size * 0.75f)(path.size - 2)
             && !isCrossPath(path, newPos)(path.size - 2)) {
           updatePosition(delta)
         }
