@@ -83,7 +83,7 @@ class Player(field: GameField) extends AbstractObject(field) {
             isTurned = dir == UP || dir == DOWN
             isBack = dir == LEFT
         }
-        if (isBack) {
+        if (isBack || !isReady) {
           stop()
           isBack = false
           return
@@ -196,7 +196,6 @@ class Player(field: GameField) extends AbstractObject(field) {
           if (isNearBorder)
             newPos = field.getExactPoint(newPos)
           updatePosition(newPos, true)
-          resetReady()
         } else {
           if (isReady && inArea) {
             Gdx.app.log(LOG, s"position old $newPos")
@@ -204,12 +203,12 @@ class Player(field: GameField) extends AbstractObject(field) {
             startDrawing(delta)
           } else {
             updatePosition(field.getExactPoint(newPos), true)
-            resetReady()
           }
         }
 
       case _: DRAWING =>
         // check if try to close a new area
+        if (!isReady) stop()
         if ((!inArea || onBorder
                 || (nearestVertex != -1
                     && field.areaVertices.get(nearestVertex) != path.first()))
@@ -226,5 +225,6 @@ class Player(field: GameField) extends AbstractObject(field) {
           updatePosition(delta, true)
         }
     }
+    resetReady()
   }
 }

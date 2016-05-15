@@ -57,8 +57,7 @@ class WorldController(private val game: Qixxy)
   }
 
   private def handleInput(delta: Float) {
-    if (!field.player.isReady
-         && (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)
+    if ((Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)
           || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT)))
     {
       field.player.isReady = true
