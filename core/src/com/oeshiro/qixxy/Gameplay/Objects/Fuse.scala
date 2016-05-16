@@ -100,8 +100,6 @@ class Fuse(field: GameField, val player: Player)
       val nextPoint = if (currentPath.size < player.path.size) {
         player.path.get(currentPath.size).cpy()
       } else {
-        Gdx.app.log(LOG, s"curpath size ${currentPath.size}")
-        Gdx.app.log(LOG, s"path size ${player.path.size}")
         isNearPlayer = true
         player.position.cpy()
       }

@@ -159,6 +159,7 @@ class GameField(private val controller: WorldController)
   }
 
   def alignPath(path: Array[Vector2], pos: Vector2) {
+    // TODO fix it
     val last = getExactPoint(pos)
     val imin = findNearestVertex(last)
     if (!pos.epsilonEquals(last, 0.01f) && areaVertices.get(imin).dst2(pos) < Math.pow(0.5f * player.size, 2)) {
@@ -236,6 +237,7 @@ class GameField(private val controller: WorldController)
     controller.updateScore(
       calculateAreaScore(claimedAreas.peek(), isSlow),
       calculateAreaPercentage(claimedAreas.peek()))
+    sparx foreach (_.updatePath())
 
     Gdx.app.log(LOG, p_first.toString())
     Gdx.app.log(LOG, p_second.toString())

@@ -1,10 +1,9 @@
 package com.oeshiro.qixxy.Gameplay.Objects
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.{Vector2, Intersector}
+import com.badlogic.gdx.math.{Intersector, Vector2}
 import com.badlogic.gdx.utils.Timer.Task
 import com.badlogic.gdx.utils.{Array, Timer}
 
@@ -28,7 +27,7 @@ class Spark(field: GameField, var isClockwise: Boolean)
   var currentPath: Array[Vector2] = _
   var timer: Timer = _
   var i_next: Int = _
-  var isTrapped: Boolean = _
+  var needUpdate: Boolean = _
 
   val delayTime = 500
 
@@ -43,7 +42,7 @@ class Spark(field: GameField, var isClockwise: Boolean)
     updatePath()
     i_next = getNextPoint
 
-    isTrapped = false
+    needUpdate = false
     // terminal velocity equals to the player's normal one
     terminalVelocity.set(field.player.terminalVelocity)
     velocity.set(terminalVelocity)
@@ -72,8 +71,16 @@ class Spark(field: GameField, var isClockwise: Boolean)
     isClockwise = !isClockwise
   }
 
-  private def updatePath() {
-    currentPath.addAll(field.areaVertices)
+  def isTrapped: Boolean = !isInArea(field.area, position) &&
+    !isOnAreaBorder(field.areaVertices, position, 0.01f)
+
+  def updatePath() {
+    if (!isTrapped) {
+      currentPath.clear()
+      currentPath.addAll(field.areaVertices)
+      i_next = getNextPoint
+      needUpdate = false
+    }
   }
 
   private def getNextPoint: Int = {
@@ -85,13 +92,19 @@ class Spark(field: GameField, var isClockwise: Boolean)
     index
   }
 
+  private def checkPath() {
+    if (!needUpdate && isTrapped)
+      needUpdate = true
+    else if (needUpdate && !isTrapped)
+      updatePath()
+  }
+
   override def update(delta: Float) {
     if (state == MOVING) {
-      isTrapped = !isInArea(field.area, position)
-
+      checkPath()
       val nextPoint = {
         i_next = if (i_next == currentPath.size) 1
-        else if (i_next == -1) currentPath.size - 2
+        else if (i_next == 0) currentPath.size - 1
         else i_next
         currentPath.get(i_next)
       }
@@ -102,7 +115,7 @@ class Spark(field: GameField, var isClockwise: Boolean)
         .nor()
         .scl(velocity.len() * delta)
       val newPos = position.add(vel)
-      if (vel.len2() > nextPoint.cpy().sub(position).len2()) {
+      if (vel.len2() >= nextPoint.cpy().sub(position).len2()) {
         newPos.set(nextPoint.cpy())
         i_next += (if (isClockwise) -1 else 1)
       }

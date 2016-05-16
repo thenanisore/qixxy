@@ -254,7 +254,7 @@ class Player(field: GameField) extends GameFieldObject(field) {
         if ((!inArea || onBorder
                 || (nearestVertex != -1
                     && field.areaVertices.get(nearestVertex) != path.first()))
-             && path.first().dst2(newPos) > Math.pow(borderMargin, 2)) {
+             && path.first().dst(newPos) > borderMargin) {
           finishDrawing(delta, newPos)
         } else {
           continueDrawing(delta)
