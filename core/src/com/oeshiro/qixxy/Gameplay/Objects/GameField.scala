@@ -17,7 +17,7 @@ class GameField extends Disposable {
 
   var player: Player = _
   var qix: Qix = _
-  var sparxes: Array[Sparx] = _
+  var sparx: Array[Spark] = _
 
   val MARGIN = 10f
   val UI_MARGIN = Utils.viewportWidth * 0.25f + 10f
@@ -55,7 +55,8 @@ class GameField extends Disposable {
 
     player = new Player(this)
     qix = new Qix(this)
-    sparxes = new Array[Sparx]()
+    sparx = new Array[Spark]()
+    addSparx()
 
     Gdx.app.log(LOG, "level loaded")
   }
@@ -70,6 +71,16 @@ class GameField extends Disposable {
     textureSlow = new Texture(pix)
   }
 
+  private def addSparx() {
+    // TODO OBJECT POOL
+    sparx.addAll(new Spark(this, true), new Spark(this, false))
+  }
+
+  private def clearSparx() {
+    // TODO OBJECT POOL
+    sparx.clear()
+  }
+
   private def getPolygonFromVertices(vertices: Array[Vector2]): Polygon =
     new Polygon(vertices.flatMap(p => ArrayBuffer(p.x, p.y)).toArray)
 
@@ -79,7 +90,7 @@ class GameField extends Disposable {
   def update(delta: Float) {
     player.update(delta)
     qix.update(delta)
-    sparxes foreach (_.update(delta))
+    sparx foreach (_.update(delta))
   }
 
   def render(batch: SpriteBatch,
@@ -88,7 +99,7 @@ class GameField extends Disposable {
     renderBackground(shaper, polygonBatch)
     player.render(batch, shaper)
     qix.render(batch, shaper)
-    sparxes foreach (_.render(batch, shaper))
+    sparx foreach (_.render(batch, shaper))
   }
 
   def renderBackground(shaper: ShapeRenderer,

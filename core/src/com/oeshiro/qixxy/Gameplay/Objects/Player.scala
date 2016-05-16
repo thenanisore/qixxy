@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Array
 
-class Player(field: GameField) extends AbstractObject(field) {
+class Player(field: GameField) extends GameFieldObject(field) {
 
   val LOG = classOf[Player].getSimpleName
 
@@ -26,10 +26,7 @@ class Player(field: GameField) extends AbstractObject(field) {
   case object LEFT extends DIRECTION_STATE
 
   // parameters
-  val size = 8f
   val speed = 200
-  val pathMargin = 1.2f * size
-  val borderMargin = size
   var state: PLAYER_STATE = _
   var direction: DIRECTION_STATE = _
   var isAlive: Boolean = _

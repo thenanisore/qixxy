@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Timer.Task
 import com.badlogic.gdx.utils.{Timer, Array}
 
 class Fuse(field: GameField, val player: Player)
-  extends AbstractObject(field) {
+  extends GameFieldObject(field) {
 
   val LOG = classOf[Fuse].getSimpleName
 
@@ -18,13 +18,11 @@ class Fuse(field: GameField, val player: Player)
   case object WAITING extends FUSE_STATE
   case object CHASING extends FUSE_STATE
 
-  override val size: Float = player.size / 2f
+  override val size: Float = super.size * 0.5f
   var state: FUSE_STATE = _
   var currentPath: Array[Vector2] = _
   var timer: Timer = _
 
-  val pathMargin = 1.2f * size
-  val borderMargin = size
   val delayTime = 250
 
   init()
@@ -33,7 +31,7 @@ class Fuse(field: GameField, val player: Player)
     state = SLEEPING
     timer = new Timer
     currentPath = new Array[Vector2]()
-    velocity.set(0, 0)
+    velocity.setZero()
   }
 
   def start() {
@@ -47,8 +45,9 @@ class Fuse(field: GameField, val player: Player)
 
   def continue() {
     if (timer.isEmpty) {
+      // a fuse waits for a moment before continuing
       timer.postTask(new Task {
-        override def run() = state = CHASING
+        override def run() { state = CHASING }
       })
       timer.delay(delayTime)
       timer.start()
@@ -61,13 +60,14 @@ class Fuse(field: GameField, val player: Player)
 
   def finish() {
     state = SLEEPING
-    velocity.set(0, 0)
+    velocity.setZero()
     currentPath.clear()
 
     Gdx.app.log(LOG, "finished")
   }
 
   override def render(batch: SpriteBatch, shaper: ShapeRenderer) {
+    // always draw path, fuse is visible while moving only
     if (state == CHASING || state == WAITING)
       drawFusePath(shaper)
     if (state == CHASING)

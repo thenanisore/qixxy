@@ -6,9 +6,9 @@ import com.badlogic.gdx.math._
 import com.badlogic.gdx.utils.Array
 import com.oeshiro.qixxy.Utils
 
-abstract class AbstractObject(val field: GameField) {
+abstract class GameFieldObject(val field: GameField) {
 
-  val size: Float
+  def size: Float = 8f
 
   var position = new Vector2()
   var dimension = new Vector2(1, 1)
@@ -23,8 +23,8 @@ abstract class AbstractObject(val field: GameField) {
   var acceleration = new Vector2()
   var bounds = new Rectangle()
 
-  val pathMargin: Float
-  val borderMargin: Float
+  val pathMargin = 1.2f * size
+  val borderMargin = size
 
   def updateMotion(delta: Float) {
     updateMotionX(delta)
