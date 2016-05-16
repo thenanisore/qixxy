@@ -27,7 +27,7 @@ class Player(field: GameField) extends AbstractObject(field) {
 
   // parameters
   val size = 8f
-  val speed = 250
+  val speed = 200
   val pathMargin = 1.2f * size
   val borderMargin = size
   var state: PLAYER_STATE = _
@@ -48,6 +48,7 @@ class Player(field: GameField) extends AbstractObject(field) {
   var currentVelocity: Vector2 = _
 
   var path: Array[Vector2] = _
+  var fuse: Fuse = _
 
   init()
 
@@ -68,6 +69,7 @@ class Player(field: GameField) extends AbstractObject(field) {
       (field.areaVertices.get(0).y + field.areaVertices.get(1).y)/ 2f )
 
     path = new Array[Vector2]()
+    fuse = new Fuse(field, this)
   }
 
   def setSlowMode() {
@@ -83,6 +85,9 @@ class Player(field: GameField) extends AbstractObject(field) {
     if (state == DRAWING_SLOW) state = DRAWING_FAST
     setNormalVelocity()
   }
+
+  def isStoppedDrawing: Boolean =
+    state.isInstanceOf[DRAWING] && velocity.x == 0 && velocity.y == 0
 
   private def changeDirection(dir: DIRECTION_STATE) {
     if (dir != direction) {
@@ -158,11 +163,6 @@ class Player(field: GameField) extends AbstractObject(field) {
     }
   }
 
-  private def resetFast() {
-    if (isFast)
-      isFast = false
-  }
-
   private def startDrawing(delta: Float) {
     state = if (isSlow) {
       setSlowVelocity()
@@ -172,6 +172,8 @@ class Player(field: GameField) extends AbstractObject(field) {
       DRAWING_FAST
     }
     path.add(field.getExactPoint(position))
+    fuse.start()
+
     Gdx.app.log(LOG, "state changed to DRAWING")
     Gdx.app.log(LOG, s"started at ${path.first()}")
   }
@@ -192,8 +194,11 @@ class Player(field: GameField) extends AbstractObject(field) {
     state = NOT_DRAWING
     path.clear()
     isReady = false
+
+    fuse.finish()
     resetSlow()
     stop()
+
     Gdx.app.log(LOG, "state changed to NOT_DRAWING")
     Gdx.app.log(LOG, s"now areas: ${field.claimedAreas.size}")
   }
@@ -217,6 +222,7 @@ class Player(field: GameField) extends AbstractObject(field) {
     drawPlayer(shaper)
     if (state.isInstanceOf[DRAWING]) {
       drawPath(shaper)
+      fuse.render(batch, shaper)
     }
   }
 
@@ -262,6 +268,11 @@ class Player(field: GameField) extends AbstractObject(field) {
             && !isCrossPath(path, newPos)(path.size - 3)) {
           updatePosition(delta, true)
         }
+
+        // update fuse while drawing
+        if (isStoppedDrawing) fuse.continue()
+        else fuse.pause()
+        fuse.update(delta)
     }
     resetReady()
   }
