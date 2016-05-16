@@ -8,7 +8,7 @@ import com.oeshiro.qixxy.Utils
 
 abstract class GameFieldObject(val field: GameField) {
 
-  def size: Float = 8f
+  def size: Float = 6f
 
   var position = new Vector2()
   var dimension = new Vector2(1, 1)
@@ -23,7 +23,7 @@ abstract class GameFieldObject(val field: GameField) {
   var acceleration = new Vector2()
   var bounds = new Rectangle()
 
-  val pathMargin = 1.2f * size
+  val pathMargin = size
   val borderMargin = size
 
   def updateMotion(delta: Float) {

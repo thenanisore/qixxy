@@ -35,27 +35,30 @@ class Fuse(field: GameField, val player: Player)
   }
 
   def start() {
-    state = WAITING
-    velocity.set(player.slowVelocity)
-    position.set(player.path.first())
-    currentPath.add(player.path.first())
-
-    Gdx.app.log(LOG, "started")
-  }
-
-  def continue() {
     if (timer.isEmpty) {
-      // a fuse waits for a moment before continuing
+      // a fuse waits for a moment before starting
       timer.postTask(new Task {
-        override def run() { state = CHASING }
+        override def run() {
+          if (player.state.isInstanceOf[player.DRAWING]) {
+            velocity.set(player.slowVelocity)
+            position.set(player.path.first())
+            currentPath.add(player.path.first())
+            state = WAITING
+            Gdx.app.log(LOG, "started")
+          }
+        }
       })
       timer.delay(delayTime)
       timer.start()
     }
   }
 
+  def continue() {
+    if (state == WAITING) state = CHASING
+  }
+
   def pause() {
-    state = WAITING
+    if (state == CHASING) state = WAITING
   }
 
   def finish() {
@@ -93,9 +96,13 @@ class Fuse(field: GameField, val player: Player)
 
   override def update(delta: Float) {
     if (state == CHASING) {
+      var isNearPlayer = false
       val nextPoint = if (currentPath.size < player.path.size) {
         player.path.get(currentPath.size).cpy()
       } else {
+        Gdx.app.log(LOG, s"curpath size ${currentPath.size}")
+        Gdx.app.log(LOG, s"path size ${player.path.size}")
+        isNearPlayer = true
         player.position.cpy()
       }
 
@@ -105,7 +112,7 @@ class Fuse(field: GameField, val player: Player)
         .nor()
         .scl(velocity.len() * delta)
       val newPos = position.add(vel)
-      if (vel.len2() > nextPoint.cpy().sub(position).len2()) {
+      if (!isNearPlayer && vel.len2() >= nextPoint.cpy().sub(position).len2()) {
         newPos.set(nextPoint.cpy())
         currentPath.add(newPos.cpy())
         Gdx.app.log(LOG, "add new vertex")
