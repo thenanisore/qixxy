@@ -15,6 +15,7 @@ class WorldController(private val game: Qixxy)
   var field: GameField = _
   var lives: Float = _
   var score: Int = _
+  var claimed: Float = _
   var livesVisual: Float = _
   var scoreVisual: Float = _
 
@@ -24,10 +25,12 @@ class WorldController(private val game: Qixxy)
 
   def init() {
     Gdx.input.setInputProcessor(this)
-    field = new GameField()
+    field = new GameField(this)
     score = 0
-    scoreVisual = score
+    claimed = 0
     lives = Utils.livesStart
+
+    scoreVisual = score
     livesVisual = lives
   }
 
@@ -38,11 +41,18 @@ class WorldController(private val game: Qixxy)
     }
 
     field.update(delta)
+
     if (livesVisual > lives)
       livesVisual = Math.max(lives, livesVisual - 1 * delta)
     if (scoreVisual < score)
       scoreVisual = Math.min(score, scoreVisual + 250 * delta)
+  }
 
+  def updateScore(addScore: Int, addPercentage: Float) {
+    score += addScore
+    claimed += addPercentage
+    Gdx.app.log(LOG, s"new score $score")
+    Gdx.app.log(LOG, s"claimed $claimed")
   }
 
   private def backToMenu() {

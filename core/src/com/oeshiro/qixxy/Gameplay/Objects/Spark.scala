@@ -105,7 +105,6 @@ class Spark(field: GameField, var isClockwise: Boolean)
       if (vel.len2() > nextPoint.cpy().sub(position).len2()) {
         newPos.set(nextPoint.cpy())
         i_next += (if (isClockwise) -1 else 1)
-        Gdx.app.log(LOG, "turned")
       }
       position.set(newPos)
     }

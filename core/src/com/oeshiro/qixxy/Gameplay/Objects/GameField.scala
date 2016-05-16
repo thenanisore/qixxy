@@ -6,12 +6,14 @@ import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math._
 import com.badlogic.gdx.utils.{Disposable, Array}
+import com.oeshiro.qixxy.Gameplay.WorldController
 import com.oeshiro.qixxy.Utils
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConversions._
 
-class GameField extends Disposable {
+class GameField(private val controller: WorldController)
+  extends Disposable {
 
   val LOG = classOf[GameField].getSimpleName
 
@@ -35,6 +37,9 @@ class GameField extends Disposable {
   var pix: Pixmap = _
   var textureFast: Texture = _
   var textureSlow: Texture = _
+
+  val maxPoints = 10000
+  val scoreCoef: Float =  maxPoints / borders.area()
 
   init()
 
@@ -133,6 +138,13 @@ class GameField extends Disposable {
     shaper.polygon(polygon)
   }
 
+  private def calculateAreaScore(area: Array[Vector2], isSlow: Boolean): Int =
+    (new Polygon(getFloatArray(area)).area() *
+      scoreCoef * (if (isSlow) 2 else 1)).asInstanceOf[Int]
+
+  private def calculateAreaPercentage(area: Array[Vector2]): Float =
+    new Polygon(getFloatArray(area)).area() / borders.area() * 100
+
   private def findNearestVertex(pos: Vector2): Int = {
     var imin = 0
     var dist, min = Utils.viewportWidth
@@ -220,6 +232,10 @@ class GameField extends Disposable {
     claimedAreaTypes.add(isSlow)
     areaVertices = maxArea
     area = getPolygonFromVertices(areaVertices)
+
+    controller.updateScore(
+      calculateAreaScore(claimedAreas.peek(), isSlow),
+      calculateAreaPercentage(claimedAreas.peek()))
 
     Gdx.app.log(LOG, p_first.toString())
     Gdx.app.log(LOG, p_second.toString())

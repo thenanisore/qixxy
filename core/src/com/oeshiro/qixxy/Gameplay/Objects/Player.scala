@@ -254,7 +254,6 @@ class Player(field: GameField) extends GameFieldObject(field) {
                 || (nearestVertex != -1
                     && field.areaVertices.get(nearestVertex) != path.first()))
              && path.first().dst2(newPos) > Math.pow(borderMargin, 2)) {
-          Gdx.app.log(LOG, borderMargin.toString)
           finishDrawing(delta, newPos)
         } else {
           continueDrawing(delta)
