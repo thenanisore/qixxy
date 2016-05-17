@@ -3,7 +3,7 @@ package com.oeshiro.qixxy.Gameplay
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.{BitmapFont, GlyphLayout, PolygonSpriteBatch, SpriteBatch}
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.graphics.{Color, OrthographicCamera}
+import com.badlogic.gdx.graphics.{Color, OrthographicCamera, Texture}
 import com.badlogic.gdx.utils.Disposable
 import com.oeshiro.qixxy.Utils
 
@@ -21,6 +21,8 @@ class WorldRenderer(private val wController: WorldController)
 
   var itemFont: BitmapFont = _
   val layout = new GlyphLayout()
+  var bg: Texture = _
+
 
   init()
 
@@ -42,10 +44,13 @@ class WorldRenderer(private val wController: WorldController)
 
     batch.setProjectionMatrix(camera.combined)
     batch.setProjectionMatrix(cameraGUI.combined)
+
+    bg = new Texture(Gdx.files.internal("raw/space2.png"))
   }
 
   def render() {
     batch.begin()
+    renderBackground()
     renderWorld()
     batch.end()
 
@@ -53,6 +58,12 @@ class WorldRenderer(private val wController: WorldController)
     renderGui()
     guiBatch.end()
   }
+
+  def renderBackground() {
+    batch.draw(bg, wController.field.borders.x, wController.field.borders.x,
+      wController.field.borders.width, wController.field.borders.height)
+  }
+
 
   def renderWorld() {
     camera.update()

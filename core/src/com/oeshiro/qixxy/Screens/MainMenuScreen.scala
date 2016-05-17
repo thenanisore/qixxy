@@ -1,7 +1,7 @@
 package com.oeshiro.qixxy.Screens
 
 import com.badlogic.gdx.graphics.g2d.{GlyphLayout, SpriteBatch}
-import com.badlogic.gdx.graphics.{Color, OrthographicCamera}
+import com.badlogic.gdx.graphics.{Color, OrthographicCamera, Texture}
 import com.badlogic.gdx.utils.Array
 import com.badlogic.gdx.{Gdx, Input}
 import com.oeshiro.qixxy.{Qixxy, Utils}
@@ -15,6 +15,7 @@ class MainMenuScreen(private val game: Qixxy)
 
   var camera: OrthographicCamera = _
   var batch: SpriteBatch = _
+  var bg: Texture = _
 
   // fonts and font settings
   val titleFont = Utils.initializeFont(Utils.fontKa1, 96, Color.valueOf("f0e1fe"))
@@ -28,9 +29,8 @@ class MainMenuScreen(private val game: Qixxy)
   private val menuItems = new Array[MenuItem]
   menuItems.addAll(
     new MenuItem("New game", NEW_GAME),
-    new MenuItem("Leaderboard", LEADERBOARD),
     new MenuItem("Settings", SETTINGS),
-    new MenuItem("Profiles", PROFILES),
+    new MenuItem("Leaderboard", LEADERBOARD),
     new MenuItem("Help", HELP),
     new MenuItem("Exit", EXIT)
   )
@@ -43,6 +43,7 @@ class MainMenuScreen(private val game: Qixxy)
     camera.setToOrtho(false, Utils.viewportWidth,
       Utils.viewportHeight)
     batch = new SpriteBatch()
+    bg = new Texture(Gdx.files.internal("raw/space.png"))
     selected = 0
   }
 
@@ -58,13 +59,17 @@ class MainMenuScreen(private val game: Qixxy)
     handleInput()
     camera.update()
     batch.setProjectionMatrix(camera.combined)
-
     super.render(delta)
 
     batch.begin()
+    drawBackground()
     drawTitle()
     drawMenu()
     batch.end()
+  }
+
+  private def drawBackground() {
+    batch.draw(bg, 0, 0)
   }
 
   private def drawMenu() {
@@ -76,12 +81,15 @@ class MainMenuScreen(private val game: Qixxy)
       // centralize
       layout.setText(itemFont, item.label)
       x = camera.viewportWidth / 2f - layout.width / 2f
-      yDel = layout.height * 1.3f
+      yDel = layout.height * 1.7f
 
       // "exit" is a bit lower
-      if (item.rawLabel == "Exit") y -= yDel
+      if (item.rawLabel == "Exit") y -= 1.3f * yDel
 
+      if (item.isSelected)
+        itemFont.setColor(Color.SKY)
       itemFont.draw(batch, item.label, x, y)
+      itemFont.setColor(Color.valueOf("f0e1fe"))
       y -= yDel
     }
   }
@@ -91,9 +99,10 @@ class MainMenuScreen(private val game: Qixxy)
     menuItems.get(selected).role match {
       case NEW_GAME =>
         game.setScreen(new GameScreen(game))
-      case LEADERBOARD => ???
-      case SETTINGS => ???
-      case PROFILES => ???
+      case LEADERBOARD =>
+        game.setScreen(new RecordsScreen(game))
+      case SETTINGS =>
+        game.setScreen(new OptionsScreen(game))
       case HELP =>
         game.setScreen(new HelpScreen(game))
       case EXIT =>
@@ -144,14 +153,16 @@ class MainMenuScreen(private val game: Qixxy)
   case object NEW_GAME extends MenuRole
   case object SETTINGS extends MenuRole
   case object LEADERBOARD extends MenuRole
-  case object PROFILES extends MenuRole
   case object HELP extends MenuRole
   case object EXIT extends MenuRole
 
   class MenuItem(private val _label: String, val role: MenuRole) {
     def isSelected: Boolean = menuItems.get(selected).eq(this)
-    def label: String = if (isSelected) "> " + _label + " <"
-                        else _label
+
+    def label: String = _label
+
+    /*if (isSelected) "> " + _label + " <"
+                            else _label*/
     val rawLabel = _label
   }
 }
