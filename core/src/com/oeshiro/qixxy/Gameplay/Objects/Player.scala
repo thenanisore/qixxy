@@ -1,18 +1,27 @@
 package com.oeshiro.qixxy.Gameplay.Objects
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.{Sprite, SpriteBatch, TextureRegion}
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.{Circle, Intersector, Vector2}
 import com.badlogic.gdx.utils.{Array, Disposable}
 
 import scala.collection.JavaConversions._
+import scala.collection.immutable.HashMap
 
 class Player(field: GameField)
   extends GameFieldObject(field) with Disposable {
 
   val LOG = classOf[Player].getSimpleName
+
+  var texture: Texture = _
+  var textureSlow: Texture = _
+  var textureFast: Texture = _
+  var s_texture: Sprite = _
+  var s_textureSlow: Sprite = _
+  var s_textureFast: Sprite = _
+  val pixelSize = 50
 
   // player's states
   sealed abstract class PLAYER_STATE
@@ -66,6 +75,10 @@ class Player(field: GameField)
     slowVelocity = new Vector2(terminalVelocity).scl(0.3f)
     currentVelocity = new Vector2(terminalVelocity)
     position.set(startingPosition)
+    origin.set(pixelSize * 0.5f, pixelSize * 0.5f)
+    rotation = 0f
+
+    initSprites()
 
     state = NOT_DRAWING
     direction = RIGHT
@@ -77,6 +90,21 @@ class Player(field: GameField)
 
     path = new Array[Vector2]()
     fuse = new Fuse(field, this)
+  }
+
+  def initSprites() {
+    texture = new Texture(Gdx.files.internal("raw/ship.png"))
+    textureFast = new Texture(Gdx.files.internal("raw/ship_moving.png"))
+    textureSlow = new Texture(Gdx.files.internal("raw/ship_moving_slow.png"))
+    s_texture = new Sprite(new TextureRegion(texture))
+    s_texture.setOriginCenter()
+    s_texture.setScale(0.5f)
+    s_textureSlow = new Sprite(new TextureRegion(textureSlow))
+    s_textureSlow.setOriginCenter()
+    s_textureSlow.setScale(0.5f)
+    s_textureFast = new Sprite(new TextureRegion(textureFast))
+    s_textureFast.setOriginCenter()
+    s_textureFast.setScale(0.5f)
   }
 
   def setSlowMode() {
@@ -98,6 +126,11 @@ class Player(field: GameField)
 
   private def changeDirection(dir: DIRECTION_STATE) {
     if (dir != direction) {
+      if (direction == LEFT) {
+        s_texture.flip(true, false)
+        s_textureSlow.flip(true, false)
+        s_textureFast.flip(true, false)
+      }
       if (state.isInstanceOf[DRAWING]) {
         direction match {
           case UP =>
@@ -121,6 +154,7 @@ class Player(field: GameField)
         if (isTurned) Gdx.app.log(LOG, s"turned from $direction to $dir")
       }
       direction = dir
+      rotate()
     }
   }
 
@@ -142,6 +176,20 @@ class Player(field: GameField)
   def moveDown() {
     velocity.set(0, -currentVelocity.y)
     changeDirection(DOWN)
+  }
+
+  val rotations = HashMap("UP" -> 90, "LEFT" -> 0, "DOWN" -> 270, "RIGHT" -> 0)
+
+  private def rotate() {
+    s_texture.setRotation(rotations(direction.toString))
+    s_textureSlow.setRotation(rotations(direction.toString))
+    s_textureFast.setRotation(rotations(direction.toString))
+
+    if (direction == LEFT) {
+      s_texture.flip(true, false)
+      s_textureSlow.flip(true, false)
+      s_textureFast.flip(true, false)
+    }
   }
 
   def stop() {
@@ -210,10 +258,13 @@ class Player(field: GameField)
     Gdx.app.log(LOG, s"now areas: ${field.claimedAreas.size}")
   }
 
-  private def drawPlayer(shaper: ShapeRenderer) {
-    shaper.setColor(Color.RED)
-    shaper.circle(position.x, position.y, size)
-    shaper.setColor(Color.WHITE)
+  private def drawPlayer(batch: SpriteBatch) {
+    if (velocity.x == 0 && velocity.y == 0) {
+      s_texture.draw(batch)
+    } else {
+      if (state == DRAWING_SLOW) s_textureSlow.draw(batch)
+      else s_textureFast.draw(batch)
+    }
   }
 
   private def drawPath(shaper: ShapeRenderer) {
@@ -226,11 +277,11 @@ class Player(field: GameField)
   }
 
   def render(batch: SpriteBatch, shaper: ShapeRenderer) {
-    drawPlayer(shaper)
     if (state.isInstanceOf[DRAWING]) {
       drawPath(shaper)
       fuse.render(batch, shaper)
     }
+    drawPlayer(batch)
   }
 
   def checkCollision(enemy: GameFieldObject): Boolean =
@@ -310,9 +361,15 @@ class Player(field: GameField)
         fuse.update(delta)
     }
     resetReady()
+    s_texture.setPosition(position.x - pixelSize, position.y - pixelSize * 0.5f)
+    s_textureSlow.setPosition(position.x - pixelSize, position.y - pixelSize * 0.5f)
+    s_textureFast.setPosition(position.x - pixelSize, position.y - pixelSize * 0.5f)
   }
 
   override def dispose() {
     fuse.dispose()
+    texture.dispose()
+    textureFast.dispose()
+    textureSlow.dispose()
   }
 }
