@@ -14,7 +14,7 @@ class WorldController(private val game: Qixxy)
   val LOG = classOf[WorldController].getSimpleName
 
   var field: GameField = _
-  var lives: Float = _
+  var lives: Int = _
   var score: Int = _
   var claimed: Float = _
   var livesVisual: Float = _
@@ -24,7 +24,7 @@ class WorldController(private val game: Qixxy)
   var isPaused: Boolean = _
   val loseDelay = 2000
 
-  def isGameOver: Boolean = lives == 0
+  def isGameOver: Boolean = lives < 0
   def isWin: Boolean = claimed >= 75.0f
 
   init()

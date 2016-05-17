@@ -1,7 +1,6 @@
 package com.oeshiro.qixxy.Screens
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.GL20
 import com.oeshiro.qixxy.Gameplay.{WorldController, WorldRenderer}
 import com.oeshiro.qixxy.Qixxy
 
@@ -18,10 +17,7 @@ class GameScreen(private val game: Qixxy)
     if (!paused) {
       wController.update(delta)
     }
-
-    Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
-    Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
-
+    super.render(delta)
     wRenderer.render()
   }
 

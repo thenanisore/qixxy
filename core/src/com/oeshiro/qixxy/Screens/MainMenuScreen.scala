@@ -4,27 +4,24 @@ import com.badlogic.gdx.graphics.g2d.{GlyphLayout, SpriteBatch}
 import com.badlogic.gdx.graphics.{Color, OrthographicCamera}
 import com.badlogic.gdx.utils.Array
 import com.badlogic.gdx.{Gdx, Input}
-import com.oeshiro.qixxy.{Utils, Qixxy}
+import com.oeshiro.qixxy.{Qixxy, Utils}
 
 import scala.collection.JavaConversions._
 
 class MainMenuScreen(private val game: Qixxy)
   extends AbstractGameScreen(game) {
 
-  private val LOG = classOf[MainMenuScreen].getSimpleName
+  val LOG = classOf[MainMenuScreen].getSimpleName
 
-  private val camera = new OrthographicCamera()
-  camera.setToOrtho(false, Utils.viewportWidth,
-    Utils.viewportHeight)
-
-  private val batch = new SpriteBatch()
+  var camera: OrthographicCamera = _
+  var batch: SpriteBatch = _
 
   // fonts and font settings
-  private val titleFont = Utils.initializeFont(Utils.fontKa1, 96, Color.valueOf("f0e1fe"))
-  private val itemFont = Utils.initializeFont(Utils.fontArcade, 30, Color.valueOf("f0e1fe"))
+  val titleFont = Utils.initializeFont(Utils.fontKa1, 96, Color.valueOf("f0e1fe"))
+  val itemFont = Utils.initializeFont(Utils.fontArcade, 30, Color.valueOf("f0e1fe"))
 
   // layout to calculate item's widths
-  private val layout = new GlyphLayout()
+  val layout = new GlyphLayout()
 
   // menu creation
   // (I doubt scene2d is necessary here)
@@ -37,7 +34,17 @@ class MainMenuScreen(private val game: Qixxy)
     new MenuItem("Help", HELP),
     new MenuItem("Exit", EXIT)
   )
-  private var selected = 0
+  private var selected: Int = _
+
+  init()
+
+  def init() {
+    camera = new OrthographicCamera()
+    camera.setToOrtho(false, Utils.viewportWidth,
+      Utils.viewportHeight)
+    batch = new SpriteBatch()
+    selected = 0
+  }
 
   private def drawTitle() {
     val title = "q i x x y"
