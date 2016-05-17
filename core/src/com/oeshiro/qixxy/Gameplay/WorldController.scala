@@ -1,8 +1,9 @@
 package com.oeshiro.qixxy.Gameplay
 
 import com.badlogic.gdx.Input.Keys
+import com.badlogic.gdx.utils.Timer.Task
 import com.badlogic.gdx.{Gdx, InputAdapter}
-import com.badlogic.gdx.utils.Disposable
+import com.badlogic.gdx.utils.{Timer, Disposable}
 import com.oeshiro.qixxy.Gameplay.Objects.GameField
 import com.oeshiro.qixxy.Screens.MainMenuScreen
 import com.oeshiro.qixxy.{Utils, Qixxy}
@@ -18,6 +19,10 @@ class WorldController(private val game: Qixxy)
   var claimed: Float = _
   var livesVisual: Float = _
   var scoreVisual: Float = _
+  val timer = new Timer()
+
+  var isPaused: Boolean = _
+  val loseDelay = 2000
 
   def isGameOver: Boolean = lives < 0
 
@@ -29,19 +34,20 @@ class WorldController(private val game: Qixxy)
     score = 0
     claimed = 0
     lives = Utils.livesStart
+    isPaused = false
 
     scoreVisual = score
     livesVisual = lives
   }
 
   def update(delta: Float) {
-    handleDebugInput(delta)
-    if (!isGameOver) {
-      handleInput(delta)
+    if (!isPaused) {
+      handleDebugInput(delta)
+      if (!isGameOver) {
+        handleInput(delta)
+      }
+      field.update(delta)
     }
-
-    field.update(delta)
-
     if (livesVisual > lives)
       livesVisual = Math.max(lives, livesVisual - 1 * delta)
     if (scoreVisual < score)
@@ -53,6 +59,19 @@ class WorldController(private val game: Qixxy)
     claimed += addPercentage
     Gdx.app.log(LOG, s"new score $score")
     Gdx.app.log(LOG, s"claimed $claimed")
+  }
+
+  def loseLife() {
+    lives -= 1
+    isPaused = true
+    timer.postTask(new Task {
+      override def run() {
+        field.reset()
+        isPaused = false
+      }
+    })
+    timer.delay(loseDelay)
+    timer.start()
   }
 
   private def backToMenu() {

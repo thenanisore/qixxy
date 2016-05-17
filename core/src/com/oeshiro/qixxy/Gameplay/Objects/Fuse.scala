@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.math.{Circle, Vector2}
 import com.badlogic.gdx.utils.Timer.Task
 import com.badlogic.gdx.utils.{Timer, Array}
 
@@ -25,6 +25,12 @@ class Fuse(field: GameField, val player: Player)
 
   override val startingPosition: Vector2 = player.position
   val delayTime = 250
+
+  val bounds = new Circle(position, size)
+  override def getBounds(): Circle = {
+    bounds.setPosition(position)
+    bounds
+  }
 
   init()
 

@@ -19,9 +19,9 @@ abstract class GameFieldObject(val field: GameField) {
   var velocity = new Vector2()
   var terminalVelocity = new Vector2(30, 30)
   var friction = new Vector2(500, 500)
-
   var acceleration = new Vector2()
-  var bounds = new Rectangle()
+
+  def getBounds: Circle
   val startingPosition: Vector2
 
   val pathMargin = size

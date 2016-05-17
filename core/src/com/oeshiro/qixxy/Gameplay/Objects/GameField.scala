@@ -105,6 +105,27 @@ class GameField(private val controller: WorldController)
     player.update(delta)
     qix.update(delta)
     sparx foreach (_.update(delta))
+    testCollisions()
+  }
+
+  private def testCollisions() {
+    val collision =
+      player.checkFuse() ||
+      player.checkCollision(qix) ||
+      player.checkPathCollision(qix) ||
+      sparx.exists(player.checkCollision(_))
+
+    if (collision && !controller.isPaused) {
+      controller.loseLife()
+      Gdx.app.log(LOG, "you loser")
+    }
+  }
+
+  def reset() {
+    // put sparx on the furthest vertices from the player
+    val resetPos = areaVertices.get(findFurthestVertex(player.position))
+    sparx foreach (_.reset(resetPos))
+    player.reset()
   }
 
   def render(batch: SpriteBatch,
@@ -165,6 +186,19 @@ class GameField(private val controller: WorldController)
       }
     }
     imin
+  }
+
+  private def findFurthestVertex(pos: Vector2): Int = {
+    var imax = 0
+    var dist, max = 0f
+    for (i <- 0 until areaVertices.size) {
+      dist = areaVertices.get(i).dst2(pos)
+      if (dist > max) {
+        max = dist
+        imax = i
+      }
+    }
+    imax
   }
 
   def alignPath(path: Array[Vector2], pos: Vector2) {
@@ -308,7 +342,7 @@ class GameField(private val controller: WorldController)
     result
   }
 
-  def getRandomPoint(): Vector2 = {
+  def getRandomPoint: Vector2 = {
     val ran = new Vector2()
     val rect = area.getBoundingRectangle
     while (!area.contains(ran)) {

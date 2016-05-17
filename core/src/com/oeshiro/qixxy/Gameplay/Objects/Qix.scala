@@ -3,7 +3,7 @@ package com.oeshiro.qixxy.Gameplay.Objects
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.{Intersector, Vector2}
+import com.badlogic.gdx.math.{Circle, Vector2}
 
 class Qix(field: GameField) extends GameFieldObject(field) {
 
@@ -13,11 +13,16 @@ class Qix(field: GameField) extends GameFieldObject(field) {
   case object SLEEPING extends QIX_STATE
   case object MOVING extends QIX_STATE
 
-
   var state: QIX_STATE = _
   var nextPoint: Vector2 = _
   override val size: Float = super.size * 4f
-  val speed = 120
+  val speed = 100
+
+  val bounds = new Circle(position, size)
+  override def getBounds(): Circle = {
+    bounds.setPosition(position)
+    bounds
+  }
 
   // start near the middle of the field
   val startingPosition = new Vector2(
@@ -54,7 +59,7 @@ class Qix(field: GameField) extends GameFieldObject(field) {
         while (!isInArea(field.area, nextPoint)
                || isOnAreaBorder(field.areaVertices, nextPoint, size)
                || position.epsilonEquals(nextPoint, size * 0.5f))
-          nextPoint.set(field.getRandomPoint())
+          nextPoint.set(field.getRandomPoint)
         state = MOVING
 
       case MOVING =>

@@ -3,7 +3,7 @@ package com.oeshiro.qixxy.Gameplay.Objects
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.{Intersector, Vector2}
+import com.badlogic.gdx.math.{Circle, Intersector, Vector2}
 import com.badlogic.gdx.utils.Array
 
 class Spark(field: GameField, var isClockwise: Boolean)
@@ -26,6 +26,12 @@ class Spark(field: GameField, var isClockwise: Boolean)
   var currentPath: Array[Vector2] = _
   var i_next: Int = _
   var needUpdate: Boolean = _
+
+  val bounds = new Circle(position, size)
+  override def getBounds(): Circle = {
+    bounds.setPosition(position)
+    bounds
+  }
 
   init()
 
@@ -59,6 +65,7 @@ class Spark(field: GameField, var isClockwise: Boolean)
 
   def changeDirection() {
     isClockwise = !isClockwise
+    i_next = getNextPoint
   }
 
   def isTrapped: Boolean = !isInArea(field.area, position) &&
@@ -71,6 +78,11 @@ class Spark(field: GameField, var isClockwise: Boolean)
       i_next = getNextPoint
       needUpdate = false
     }
+  }
+
+  def reset(newPos: Vector2) {
+    position.set(newPos)
+    i_next = getNextPoint
   }
 
   private def getNextPoint: Int = {

@@ -4,8 +4,10 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.{Intersector, Vector2}
+import com.badlogic.gdx.math.{Intersector, Circle, Rectangle, Vector2}
 import com.badlogic.gdx.utils.Array
+
+import scala.collection.JavaConversions._
 
 class Player(field: GameField) extends GameFieldObject(field) {
 
@@ -29,11 +31,10 @@ class Player(field: GameField) extends GameFieldObject(field) {
   override val startingPosition = new Vector2((
     field.areaVertices.get(0).x + field.areaVertices.get(1).x) / 2f,
     field.areaVertices.get(0).y)
-  val speed = 200
+  val speed = 150
 
   var state: PLAYER_STATE = _
   var direction: DIRECTION_STATE = _
-  var isAlive: Boolean = _
   var isReady: Boolean = _
   var isSlow: Boolean = _
   var isFast: Boolean = _
@@ -51,6 +52,12 @@ class Player(field: GameField) extends GameFieldObject(field) {
   var path: Array[Vector2] = _
   var fuse: Fuse = _
 
+  val bounds = new Circle(position, size)
+  override def getBounds(): Circle = {
+    bounds.setPosition(position)
+    bounds
+  }
+
   init()
 
   def init() {
@@ -61,7 +68,6 @@ class Player(field: GameField) extends GameFieldObject(field) {
 
     state = NOT_DRAWING
     direction = RIGHT
-    isAlive = true
     isReady = false
     isTurned = false
     isBack = false
@@ -224,6 +230,30 @@ class Player(field: GameField) extends GameFieldObject(field) {
       drawPath(shaper)
       fuse.render(batch, shaper)
     }
+  }
+
+  def checkCollision(enemy: GameFieldObject): Boolean =
+    getBounds.overlaps(enemy.getBounds)
+
+  def checkFuse(): Boolean =
+    state.isInstanceOf[DRAWING] && fuse.position.epsilonEquals(position, 0.1f)
+
+  def checkPathCollision(enemy: GameFieldObject): Boolean =
+    enemy.isOnAreaBorder(path, enemy.position, enemy.size)
+
+  def reset() {
+    if (path.nonEmpty)
+      position.set(path.first())
+    path.clear()
+    state = NOT_DRAWING
+    fuse.finish()
+    isReady = false
+    isTurned = false
+    isBack = false
+    isSlow = false
+    isFast = true
+    stop()
+    Gdx.app.log(LOG, "reset")
   }
 
   override def update(delta: Float) {
