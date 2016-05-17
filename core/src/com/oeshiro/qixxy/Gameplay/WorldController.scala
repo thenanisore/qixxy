@@ -2,11 +2,11 @@ package com.oeshiro.qixxy.Gameplay
 
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.utils.Timer.Task
+import com.badlogic.gdx.utils.{Disposable, Timer}
 import com.badlogic.gdx.{Gdx, InputAdapter}
-import com.badlogic.gdx.utils.{Timer, Disposable}
 import com.oeshiro.qixxy.Gameplay.Objects.GameField
 import com.oeshiro.qixxy.Screens.MainMenuScreen
-import com.oeshiro.qixxy.{Utils, Qixxy}
+import com.oeshiro.qixxy.{Qixxy, Utils}
 
 class WorldController(private val game: Qixxy)
   extends InputAdapter with Disposable {
@@ -24,7 +24,8 @@ class WorldController(private val game: Qixxy)
   var isPaused: Boolean = _
   val loseDelay = 2000
 
-  def isGameOver: Boolean = lives < 0
+  def isGameOver: Boolean = lives == 0
+  def isWin: Boolean = claimed >= 75.0f
 
   init()
 
@@ -59,15 +60,41 @@ class WorldController(private val game: Qixxy)
     claimed += addPercentage
     Gdx.app.log(LOG, s"new score $score")
     Gdx.app.log(LOG, s"claimed $claimed")
+
+    // check win conditions
+    if (isWin) win()
   }
 
   def loseLife() {
     lives -= 1
     isPaused = true
+    timer.clear()
     timer.postTask(new Task {
       override def run() {
+        // check game over conditions
+        if (isGameOver) lose()
         field.reset()
         isPaused = false
+      }
+    })
+    timer.delay(loseDelay)
+    timer.start()
+  }
+
+  def lose() {
+    Gdx.app.log(LOG, "you lose")
+    backToMenu()
+  }
+
+  def win() {
+    isPaused = true
+    Gdx.app.log(LOG, "you win, congratulations")
+    timer.clear()
+    timer.postTask(new Task {
+      override def run() {
+        // check game over conditions
+        field.reset()
+        backToMenu()
       }
     })
     timer.delay(loseDelay)

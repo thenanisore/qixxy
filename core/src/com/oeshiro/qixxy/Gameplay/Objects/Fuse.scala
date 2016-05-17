@@ -2,14 +2,14 @@ package com.oeshiro.qixxy.Gameplay.Objects
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.{ParticleEffect, SpriteBatch}
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.{Circle, Vector2}
 import com.badlogic.gdx.utils.Timer.Task
-import com.badlogic.gdx.utils.{Timer, Array}
+import com.badlogic.gdx.utils.{Array, Disposable, Timer}
 
 class Fuse(field: GameField, val player: Player)
-  extends GameFieldObject(field) {
+  extends GameFieldObject(field) with Disposable {
 
   val LOG = classOf[Fuse].getSimpleName
 
@@ -22,12 +22,13 @@ class Fuse(field: GameField, val player: Player)
   var state: FUSE_STATE = _
   var currentPath: Array[Vector2] = _
   var timer: Timer = _
+  var fuseParticle = new ParticleEffect()
 
   override val startingPosition: Vector2 = player.position
   val delayTime = 250
 
   val bounds = new Circle(position, size)
-  override def getBounds(): Circle = {
+  override def getBounds: Circle = {
     bounds.setPosition(position)
     bounds
   }
@@ -37,6 +38,8 @@ class Fuse(field: GameField, val player: Player)
   def init() {
     state = SLEEPING
     timer = new Timer
+    fuseParticle.load(Gdx.files.internal("particles/spark.pfx"),
+      Gdx.files.internal("particles"))
     currentPath = new Array[Vector2]()
     velocity.setZero()
   }
@@ -50,6 +53,7 @@ class Fuse(field: GameField, val player: Player)
             velocity.set(player.slowVelocity)
             position.set(player.path.first())
             currentPath.add(player.path.first())
+            fuseParticle.reset()
             state = WAITING
             Gdx.app.log(LOG, "started")
           }
@@ -62,32 +66,33 @@ class Fuse(field: GameField, val player: Player)
 
   def continue() {
     if (state == WAITING) state = CHASING
+    fuseParticle.reset()
   }
 
   def pause() {
     if (state == CHASING) state = WAITING
+    fuseParticle.allowCompletion()
   }
 
   def finish() {
     state = SLEEPING
+    fuseParticle.allowCompletion()
     velocity.setZero()
     currentPath.clear()
 
     Gdx.app.log(LOG, "finished")
   }
 
-  override def render(batch: SpriteBatch, shaper: ShapeRenderer) {
+  def render(batch: SpriteBatch, shaper: ShapeRenderer) {
     // always draw path, fuse is visible while moving only
     if (state == CHASING || state == WAITING)
       drawFusePath(shaper)
     if (state == CHASING)
-      drawFuse(shaper)
+      drawFuse(batch)
   }
 
-  private def drawFuse(shaper: ShapeRenderer) {
-    shaper.setColor(Color.YELLOW)
-    shaper.circle(position.x, position.y, size)
-    shaper.setColor(Color.WHITE)
+  private def drawFuse(batch: SpriteBatch) {
+    fuseParticle.draw(batch)
   }
 
   private def drawFusePath(shaper: ShapeRenderer) {
@@ -124,5 +129,11 @@ class Fuse(field: GameField, val player: Player)
       }
       position.set(newPos)
     }
+    fuseParticle.setPosition(position.x - size, position.y)
+    fuseParticle.update(delta)
+  }
+
+  override def dispose() {
+    fuseParticle.dispose()
   }
 }

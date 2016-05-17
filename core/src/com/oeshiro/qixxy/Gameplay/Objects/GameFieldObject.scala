@@ -1,7 +1,5 @@
 package com.oeshiro.qixxy.Gameplay.Objects
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math._
 import com.badlogic.gdx.utils.Array
 import com.oeshiro.qixxy.Utils
@@ -41,20 +39,18 @@ abstract class GameFieldObject(val field: GameField) {
   def updatePosition(delta: Float, needAlign: Boolean) {
     position.x += velocity.x * delta
     position.y += velocity.y * delta
-    if (needAlign) align
+    if (needAlign) align()
   }
 
   def updatePosition(newPos: Vector2, needAlign: Boolean) {
     position.set(newPos)
-    if (needAlign) align
+    if (needAlign) align()
   }
 
   def update(delta: Float) {
     updateMotion(delta)
-    updatePosition(delta, false)
+    updatePosition(delta, needAlign = false)
   }
-
-  def render(batch: SpriteBatch, shaper: ShapeRenderer): Unit
 
   def isOnAreaBorder(vertices: Array[Vector2], pos: Vector2, e: Float)
                     (implicit last_i: Int = vertices.size - 1): Boolean = {

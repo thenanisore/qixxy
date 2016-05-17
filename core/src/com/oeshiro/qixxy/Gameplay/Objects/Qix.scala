@@ -19,7 +19,7 @@ class Qix(field: GameField) extends GameFieldObject(field) {
   val speed = 100
 
   val bounds = new Circle(position, size)
-  override def getBounds(): Circle = {
+  override def getBounds: Circle = {
     bounds.setPosition(position)
     bounds
   }
@@ -39,7 +39,7 @@ class Qix(field: GameField) extends GameFieldObject(field) {
     velocity.set(terminalVelocity)
   }
 
-  override def render(batch: SpriteBatch, shaper: ShapeRenderer) {
+  def render(batch: SpriteBatch, shaper: ShapeRenderer) {
     drawQix(shaper)
     shaper.circle(nextPoint.x, nextPoint.y, 1)
   }

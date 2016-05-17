@@ -1,17 +1,17 @@
 package com.oeshiro.qixxy.Gameplay.Objects
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.{Texture, Color, Pixmap}
 import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.graphics.{Color, Pixmap, Texture}
 import com.badlogic.gdx.math._
 import com.badlogic.gdx.utils.Timer.Task
-import com.badlogic.gdx.utils.{Timer, Disposable, Array}
+import com.badlogic.gdx.utils.{Array, Disposable, Timer}
 import com.oeshiro.qixxy.Gameplay.WorldController
 import com.oeshiro.qixxy.Utils
 
-import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ArrayBuffer
 
 class GameField(private val controller: WorldController)
   extends Disposable {
@@ -117,15 +117,15 @@ class GameField(private val controller: WorldController)
 
     if (collision && !controller.isPaused) {
       controller.loseLife()
-      Gdx.app.log(LOG, "you loser")
+      Gdx.app.log(LOG, "you lost life")
     }
   }
 
   def reset() {
+    player.reset()
     // put sparx on the furthest vertices from the player
     val resetPos = areaVertices.get(findFurthestVertex(player.position))
     sparx foreach (_.reset(resetPos))
-    player.reset()
   }
 
   def render(batch: SpriteBatch,
@@ -134,7 +134,7 @@ class GameField(private val controller: WorldController)
     renderBackground(shaper, polygonBatch)
     player.render(batch, shaper)
     qix.render(batch, shaper)
-    sparx foreach (_.render(batch, shaper))
+    sparx foreach (_.render(batch))
   }
 
   def renderBackground(shaper: ShapeRenderer,
@@ -266,17 +266,22 @@ class GameField(private val controller: WorldController)
       }
     }
 
-    // TODO REWRITE
-    val a1 = getPolygonFromVertices(p_first).area()
-    val a2 = getPolygonFromVertices(p_second).area()
-    val minArea = if (a1 < a2) p_first else p_second
-    val maxArea = if (a1 > a2) p_first else p_second
-
-    claimedAreas.add(minArea)
+    // claimed becomes the area not containing Qix
+    val claimed = new Array[Vector2]()
+    val free = new Array[Vector2]()
+    if (Intersector.isPointInPolygon(p_first, qix.position)) {
+      free.addAll(p_first)
+      claimed.addAll(p_second)
+    } else {
+      free.addAll(p_second)
+      claimed.addAll(p_first)
+    }
+    claimedAreas.add(claimed)
     claimedAreaTypes.add(isSlow)
-    areaVertices = maxArea
+    areaVertices = free
     area = getPolygonFromVertices(areaVertices)
 
+    // update score and sparx
     controller.updateScore(
       calculateAreaScore(claimedAreas.peek(), isSlow),
       calculateAreaPercentage(claimedAreas.peek()))
@@ -356,6 +361,8 @@ class GameField(private val controller: WorldController)
 
   override def dispose() {
     pix.dispose()
+    player.dispose()
+    sparx foreach (_.dispose())
     textureFast.dispose()
     textureSlow.dispose()
   }

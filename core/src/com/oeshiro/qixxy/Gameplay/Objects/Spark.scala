@@ -1,13 +1,12 @@
 package com.oeshiro.qixxy.Gameplay.Objects
 
-import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.g2d.{ParticleEffect, SpriteBatch}
 import com.badlogic.gdx.math.{Circle, Intersector, Vector2}
-import com.badlogic.gdx.utils.Array
+import com.badlogic.gdx.utils.{Array, Disposable}
 
 class Spark(field: GameField, var isClockwise: Boolean)
-  extends GameFieldObject(field) {
+  extends GameFieldObject(field) with Disposable {
 
   val LOG = classOf[Spark].getSimpleName
 
@@ -15,6 +14,7 @@ class Spark(field: GameField, var isClockwise: Boolean)
   case object SLEEPING extends SPARK_STATE
   case object MOVING extends SPARK_STATE
 
+  var sparkParticle = new ParticleEffect()
   override val size: Float = super.size * 0.8f
 
   // start at the middle-top of the field
@@ -28,7 +28,7 @@ class Spark(field: GameField, var isClockwise: Boolean)
   var needUpdate: Boolean = _
 
   val bounds = new Circle(position, size)
-  override def getBounds(): Circle = {
+  override def getBounds: Circle = {
     bounds.setPosition(position)
     bounds
   }
@@ -38,6 +38,8 @@ class Spark(field: GameField, var isClockwise: Boolean)
   def init() {
     state = SLEEPING
     position.set(startingPosition)
+    sparkParticle.load(Gdx.files.internal("particles/spark.pfx"),
+      Gdx.files.internal("particles"))
 
     currentPath = new Array[Vector2]()
     updatePath()
@@ -49,18 +51,12 @@ class Spark(field: GameField, var isClockwise: Boolean)
     velocity.set(terminalVelocity)
   }
 
-  override def render(batch: SpriteBatch, shaper: ShapeRenderer) {
-    drawSpark(shaper)
+  def render(batch: SpriteBatch) {
+    sparkParticle.draw(batch)
   }
 
   def start() {
     state = MOVING
-  }
-
-  private def drawSpark(shaper: ShapeRenderer) {
-    shaper.setColor(Color.YELLOW)
-    shaper.circle(position.x, position.y, size)
-    shaper.setColor(Color.WHITE)
   }
 
   def changeDirection() {
@@ -123,5 +119,11 @@ class Spark(field: GameField, var isClockwise: Boolean)
       }
       position.set(newPos)
     }
+    sparkParticle.setPosition(position.x - size, position.y)
+    sparkParticle.update(delta)
+  }
+
+  override def dispose() {
+    sparkParticle.dispose()
   }
 }

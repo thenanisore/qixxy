@@ -4,12 +4,13 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.{Intersector, Circle, Rectangle, Vector2}
-import com.badlogic.gdx.utils.Array
+import com.badlogic.gdx.math.{Circle, Intersector, Vector2}
+import com.badlogic.gdx.utils.{Array, Disposable}
 
 import scala.collection.JavaConversions._
 
-class Player(field: GameField) extends GameFieldObject(field) {
+class Player(field: GameField)
+  extends GameFieldObject(field) with Disposable {
 
   val LOG = classOf[Player].getSimpleName
 
@@ -53,7 +54,7 @@ class Player(field: GameField) extends GameFieldObject(field) {
   var fuse: Fuse = _
 
   val bounds = new Circle(position, size)
-  override def getBounds(): Circle = {
+  override def getBounds: Circle = {
     bounds.setPosition(position)
     bounds
   }
@@ -195,7 +196,7 @@ class Player(field: GameField) extends GameFieldObject(field) {
   private def finishDrawing(delta: Float, newPos: Vector2) {
     field.alignPath(path, newPos)
     Gdx.app.log(LOG, s"finished at ${path.peek()}")
-    updatePosition(path.peek(), true)
+    updatePosition(path.peek(), needAlign = true)
     field.processPath(path, state == DRAWING_SLOW)
     state = NOT_DRAWING
     path.clear()
@@ -224,7 +225,7 @@ class Player(field: GameField) extends GameFieldObject(field) {
     }
   }
 
-  override def render(batch: SpriteBatch, shaper: ShapeRenderer) {
+  def render(batch: SpriteBatch, shaper: ShapeRenderer) {
     drawPlayer(shaper)
     if (state.isInstanceOf[DRAWING]) {
       drawPath(shaper)
@@ -236,10 +237,14 @@ class Player(field: GameField) extends GameFieldObject(field) {
     getBounds.overlaps(enemy.getBounds)
 
   def checkFuse(): Boolean =
-    state.isInstanceOf[DRAWING] && fuse.position.epsilonEquals(position, 0.1f)
+    state.isInstanceOf[DRAWING] && fuse.position.epsilonEquals(position, 1f)
 
-  def checkPathCollision(enemy: GameFieldObject): Boolean =
-    enemy.isOnAreaBorder(path, enemy.position, enemy.size)
+  def checkPathCollision(enemy: GameFieldObject): Boolean = {
+    if (state.isInstanceOf[DRAWING])
+      enemy.isOnAreaBorder(path, enemy.position, enemy.size) ||
+      (Intersector.distanceSegmentPoint(path.peek(), position, enemy.position) < enemy.size)
+    else false
+  }
 
   def reset() {
     if (path.nonEmpty)
@@ -270,14 +275,14 @@ class Player(field: GameField) extends GameFieldObject(field) {
         if ((onBorder || isNearBorder) && isDisplacementInArea) {
           if (isNearBorder)
             newPos = field.getExactPoint(newPos)
-          updatePosition(newPos, true)
+          updatePosition(newPos, needAlign = true)
         } else {
           if (isReady && inArea) {
             Gdx.app.log(LOG, s"position old $newPos")
-            updatePosition(delta, true)
+            updatePosition(delta, needAlign = true)
             startDrawing(delta)
           } else {
-            updatePosition(field.getExactPoint(newPos), true)
+            updatePosition(field.getExactPoint(newPos), needAlign = true)
           }
         }
 
@@ -296,7 +301,7 @@ class Player(field: GameField) extends GameFieldObject(field) {
         // check if cross the current path or is too close
         if (!isOnAreaBorder(path, newPos, pathMargin)(path.size - 3)
             && !isCrossPath(path, newPos)(path.size - 3)) {
-          updatePosition(delta, true)
+          updatePosition(delta, needAlign = true)
         }
 
         // update fuse while drawing
@@ -305,5 +310,9 @@ class Player(field: GameField) extends GameFieldObject(field) {
         fuse.update(delta)
     }
     resetReady()
+  }
+
+  override def dispose() {
+    fuse.dispose()
   }
 }
