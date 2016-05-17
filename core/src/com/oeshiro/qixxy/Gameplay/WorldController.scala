@@ -45,7 +45,7 @@ class WorldController(private val game: Qixxy)
   def update(delta: Float) {
     if (!isPaused) {
       handleDebugInput(delta)
-      if (!isGameOver) {
+      if (!isGameOver && !isWin) {
         handleInput(delta)
       }
       field.update(delta)
@@ -83,6 +83,7 @@ class WorldController(private val game: Qixxy)
   }
 
   def lose() {
+    isPaused = true
     Gdx.app.log(LOG, "you lose")
     timer.clear()
     timer.postTask(new Task {

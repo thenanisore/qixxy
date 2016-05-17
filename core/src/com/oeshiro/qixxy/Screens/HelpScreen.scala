@@ -1,9 +1,9 @@
 package com.oeshiro.qixxy.Screens
 
-import com.badlogic.gdx.{Input, Gdx}
-import com.badlogic.gdx.graphics.{Color, OrthographicCamera}
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.oeshiro.qixxy.{Utils, Qixxy}
+import com.badlogic.gdx.graphics.{Color, OrthographicCamera, Texture}
+import com.badlogic.gdx.{Gdx, Input}
+import com.oeshiro.qixxy.{Qixxy, Utils}
 
 class HelpScreen(private val game: Qixxy)
   extends AbstractGameScreen(game) {
@@ -14,10 +14,24 @@ class HelpScreen(private val game: Qixxy)
   camera.setToOrtho(false, Utils.viewportWidth,
     Utils.viewportHeight)
 
-  val batch = new SpriteBatch()
+  var batch: SpriteBatch = _
+  var bg: Texture = _
+  var help1: Texture = _
+  var help2: Texture = _
 
   // fonts and font settings
   val textFont = Utils.initializeFont(Utils.fontArcade, 30, Color.valueOf("f0e1fe"))
+  var selectedPage: Int = _
+
+  init()
+
+  def init() {
+    batch = new SpriteBatch()
+    bg = new Texture(Gdx.files.internal("raw/space.png"))
+    help1 = new Texture(Gdx.files.internal("raw/help_1.png"))
+    help2 = new Texture(Gdx.files.internal("raw/help_2.png"))
+    selectedPage = 1
+  }
 
   override def render(delta: Float) {
     handleInput()
@@ -27,22 +41,27 @@ class HelpScreen(private val game: Qixxy)
     super.render(delta)
 
     batch.begin()
-    writeMessage()
+    if (selectedPage == 1) batch.draw(help1, 0, 0)
+    else if (selectedPage == 2) batch.draw(help2, 0, 0)
     batch.end()
-  }
-
-  private def writeMessage() {
-    textFont.draw(batch, "Help", camera.viewportWidth / 2f, camera.viewportHeight / 2f)
   }
 
   private def handleInput() {
     if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       game.setScreen(new MainMenuScreen(game))
     }
+    if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+      selectedPage = 2
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
+      selectedPage = 1
+    }
   }
 
   override def dispose() {
     batch.dispose()
+    help1.dispose()
+    help2.dispose()
+    bg.dispose()
     textFont.dispose()
   }
 

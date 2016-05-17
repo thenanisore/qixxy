@@ -29,8 +29,8 @@ class MainMenuScreen(private val game: Qixxy)
   private val menuItems = new Array[MenuItem]
   menuItems.addAll(
     new MenuItem("New game", NEW_GAME),
-    new MenuItem("Settings", SETTINGS),
-    new MenuItem("Leaderboard", LEADERBOARD),
+    //    new MenuItem("Settings", SETTINGS),
+    //    new MenuItem("Leaderboard", LEADERBOARD),
     new MenuItem("Help", HELP),
     new MenuItem("Exit", EXIT)
   )

@@ -61,7 +61,7 @@ class GameField(private val controller: WorldController)
     areaVertices.addAll(bordersVertices)
     area = getPolygonFromVertices(areaVertices)
 
-    initTextures(Color.valueOf("9669D277"), Color.valueOf("00FF00"))
+    initTextures(Color.valueOf("9669D277"), Color.valueOf("007F7E88"))
 
     player = new Player(this)
     qix = new Qix(this)
