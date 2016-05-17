@@ -26,7 +26,11 @@ class Player(field: GameField) extends GameFieldObject(field) {
   case object LEFT extends DIRECTION_STATE
 
   // parameters
+  override val startingPosition = new Vector2((
+    field.areaVertices.get(0).x + field.areaVertices.get(1).x) / 2f,
+    field.areaVertices.get(0).y)
   val speed = 200
+
   var state: PLAYER_STATE = _
   var direction: DIRECTION_STATE = _
   var isAlive: Boolean = _
@@ -53,6 +57,7 @@ class Player(field: GameField) extends GameFieldObject(field) {
     terminalVelocity.set(speed, speed)
     slowVelocity = new Vector2(terminalVelocity).scl(0.3f)
     currentVelocity = new Vector2(terminalVelocity)
+    position.set(startingPosition)
 
     state = NOT_DRAWING
     direction = RIGHT
@@ -62,8 +67,6 @@ class Player(field: GameField) extends GameFieldObject(field) {
     isBack = false
     isSlow = false
     isFast = true
-    position.set(field.areaVertices.get(0).x,
-      (field.areaVertices.get(0).y + field.areaVertices.get(1).y)/ 2f )
 
     path = new Array[Vector2]()
     fuse = new Fuse(field, this)

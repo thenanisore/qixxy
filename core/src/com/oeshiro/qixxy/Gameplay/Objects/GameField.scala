@@ -5,7 +5,8 @@ import com.badlogic.gdx.graphics.{Texture, Color, Pixmap}
 import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math._
-import com.badlogic.gdx.utils.{Disposable, Array}
+import com.badlogic.gdx.utils.Timer.Task
+import com.badlogic.gdx.utils.{Timer, Disposable, Array}
 import com.oeshiro.qixxy.Gameplay.WorldController
 import com.oeshiro.qixxy.Utils
 
@@ -37,9 +38,11 @@ class GameField(private val controller: WorldController)
   var pix: Pixmap = _
   var textureFast: Texture = _
   var textureSlow: Texture = _
+  var timer: Timer = _
 
   val maxPoints = 10000
   val scoreCoef: Float =  maxPoints / borders.area()
+  val sparxDelayTime = 500
 
   init()
 
@@ -61,6 +64,7 @@ class GameField(private val controller: WorldController)
     player = new Player(this)
     qix = new Qix(this)
     sparx = new Array[Spark]()
+    timer = new Timer()
     addSparx()
 
     Gdx.app.log(LOG, "level loaded")
@@ -79,6 +83,11 @@ class GameField(private val controller: WorldController)
   private def addSparx() {
     // TODO OBJECT POOL
     sparx.addAll(new Spark(this, true), new Spark(this, false))
+    timer.postTask(new Task {
+      override def run() { sparx foreach (_.start()) }
+    })
+    timer.delay(sparxDelayTime)
+    timer.start()
   }
 
   private def clearSparx() {
@@ -297,6 +306,18 @@ class GameField(private val controller: WorldController)
     }
 
     result
+  }
+
+  def getRandomPoint(): Vector2 = {
+    val ran = new Vector2()
+    val rect = area.getBoundingRectangle
+    while (!area.contains(ran)) {
+      ran.set(
+        MathUtils.random(rect.x, rect.x + rect.width),
+        MathUtils.random(rect.y, rect.y + rect.height)
+      )
+    }
+    ran
   }
 
   override def dispose() {

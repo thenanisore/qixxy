@@ -22,6 +22,7 @@ abstract class GameFieldObject(val field: GameField) {
 
   var acceleration = new Vector2()
   var bounds = new Rectangle()
+  val startingPosition: Vector2
 
   val pathMargin = size
   val borderMargin = size

@@ -4,8 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.{Intersector, Vector2}
-import com.badlogic.gdx.utils.Timer.Task
-import com.badlogic.gdx.utils.{Array, Timer}
+import com.badlogic.gdx.utils.Array
 
 class Spark(field: GameField, var isClockwise: Boolean)
   extends GameFieldObject(field) {
@@ -19,23 +18,19 @@ class Spark(field: GameField, var isClockwise: Boolean)
   override val size: Float = super.size * 0.8f
 
   // start at the middle-top of the field
-  val startingPosition = new Vector2(
+  override val startingPosition = new Vector2(
     (field.areaVertices.get(2).x - field.areaVertices.get(3).x) / 2,
     field.areaVertices.get(2).y)
 
   var state: SPARK_STATE = _
   var currentPath: Array[Vector2] = _
-  var timer: Timer = _
   var i_next: Int = _
   var needUpdate: Boolean = _
-
-  val delayTime = 500
 
   init()
 
   def init() {
     state = SLEEPING
-    timer = new Timer
     position.set(startingPosition)
 
     currentPath = new Array[Vector2]()
@@ -44,21 +39,16 @@ class Spark(field: GameField, var isClockwise: Boolean)
 
     needUpdate = false
     // terminal velocity equals to the player's normal one
-    terminalVelocity.set(field.player.terminalVelocity)
+    terminalVelocity.set(field.player.terminalVelocity.cpy().scl(0.75f))
     velocity.set(terminalVelocity)
-
-    if (timer.isEmpty) {
-      // a fuse waits for a moment before continuing
-      timer.postTask(new Task {
-        override def run() { state = MOVING }
-      })
-      timer.delay(delayTime)
-      timer.start()
-    }
   }
 
   override def render(batch: SpriteBatch, shaper: ShapeRenderer) {
     drawSpark(shaper)
+  }
+
+  def start() {
+    state = MOVING
   }
 
   private def drawSpark(shaper: ShapeRenderer) {
@@ -114,7 +104,7 @@ class Spark(field: GameField, var isClockwise: Boolean)
         .sub(position)
         .nor()
         .scl(velocity.len() * delta)
-      val newPos = position.add(vel)
+      val newPos = position.cpy().add(vel)
       if (vel.len2() >= nextPoint.cpy().sub(position).len2()) {
         newPos.set(nextPoint.cpy())
         i_next += (if (isClockwise) -1 else 1)

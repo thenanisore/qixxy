@@ -23,6 +23,7 @@ class Fuse(field: GameField, val player: Player)
   var currentPath: Array[Vector2] = _
   var timer: Timer = _
 
+  override val startingPosition: Vector2 = player.position
   val delayTime = 250
 
   init()
@@ -109,7 +110,7 @@ class Fuse(field: GameField, val player: Player)
         .sub(position)
         .nor()
         .scl(velocity.len() * delta)
-      val newPos = position.add(vel)
+      val newPos = position.cpy().add(vel)
       if (!isNearPlayer && vel.len2() >= nextPoint.cpy().sub(position).len2()) {
         newPos.set(nextPoint.cpy())
         currentPath.add(newPos.cpy())
