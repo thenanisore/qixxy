@@ -267,19 +267,23 @@ class Player(field: GameField)
     }
   }
 
-  private def drawPath(shaper: ShapeRenderer) {
-    if (path != null) {
+  val pathWidth = 2
+
+  def renderPaths(shaper: ShapeRenderer) {
+    if (state.isInstanceOf[DRAWING] && path != null) {
       for (i <- 0 until path.size - 1) {
-        shaper.line(path.get(i), path.get(i + 1))
+        shaper.rectLine(path.get(i), path.get(i + 1), pathWidth)
       }
-      shaper.line(path.peek(), position)
+      shaper.rectLine(path.peek(), position, pathWidth)
+      // always draw path, fuse is visible while moving only
+      if (fuse.state != fuse.SLEEPING)
+        fuse.renderPath(shaper)
     }
   }
 
-  def render(batch: SpriteBatch, shaper: ShapeRenderer) {
+  def render(batch: SpriteBatch) {
     if (state.isInstanceOf[DRAWING]) {
-      drawPath(shaper)
-      fuse.render(batch, shaper)
+      fuse.render(batch)
     }
     drawPlayer(batch)
   }

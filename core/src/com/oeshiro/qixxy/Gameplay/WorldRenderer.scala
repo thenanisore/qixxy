@@ -43,16 +43,19 @@ class WorldRenderer(private val wController: WorldController)
     cameraGUI.update()
 
     batch.setProjectionMatrix(camera.combined)
-    batch.setProjectionMatrix(cameraGUI.combined)
+    guiBatch.setProjectionMatrix(camera.combined)
+    shaper.setProjectionMatrix(camera.combined)
+    polygonBatch.setProjectionMatrix(camera.combined)
 
     bg = new Texture(Gdx.files.internal("raw/space2.png"))
   }
 
   def render() {
-    batch.begin()
+    camera.update()
+    cameraGUI.update()
+
     renderBackground()
     renderWorld()
-    batch.end()
 
     guiBatch.begin()
     renderGui()
@@ -60,8 +63,10 @@ class WorldRenderer(private val wController: WorldController)
   }
 
   def renderBackground() {
+    batch.begin()
     batch.draw(bg, wController.field.borders.x, wController.field.borders.x,
       wController.field.borders.width, wController.field.borders.height)
+    batch.end()
   }
 
 
@@ -69,11 +74,16 @@ class WorldRenderer(private val wController: WorldController)
     camera.update()
     shaper.setAutoShapeType(true)
 
-    shaper.begin()
+    shaper.begin(ShapeRenderer.ShapeType.Filled)
     polygonBatch.begin()
-    wController.field.render(batch, shaper, polygonBatch)
-    polygonBatch.end()
+    wController.field.renderBackground(shaper, polygonBatch)
+    wController.field.player.renderPaths(shaper)
     shaper.end()
+    polygonBatch.end()
+
+    batch.begin()
+    wController.field.renderObjects(batch)
+    batch.end()
   }
 
   def renderGui() {

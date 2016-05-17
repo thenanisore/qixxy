@@ -28,6 +28,14 @@ class GameField(private val controller: WorldController)
   val borders = new Rectangle(MARGIN, MARGIN,
     Utils.viewportWidth - UI_MARGIN,
     Utils.viewportHeight - 2f * MARGIN)
+  val bordersVertices = new Array[Vector2]()
+  bordersVertices.addAll(
+    new Vector2(borders.getX, borders.getY),
+    new Vector2(borders.getX + borders.width, borders.getY),
+    new Vector2(borders.getX + borders.width, borders.getY + borders.height),
+    new Vector2(borders.getX, borders.getY + borders.height),
+    new Vector2(borders.getX, borders.getY)
+  )
 
   var areaVertices: Array[Vector2] = _
   var area: Polygon = _
@@ -50,13 +58,7 @@ class GameField(private val controller: WorldController)
     claimedAreas = new Array[Array[Vector2]]()
     claimedAreaTypes = new Array[Boolean]()
     areaVertices = new Array[Vector2]()
-    areaVertices.addAll(
-      new Vector2(borders.getX, borders.getY),
-      new Vector2(borders.getX + borders.width, borders.getY),
-      new Vector2(borders.getX + borders.width, borders.getY + borders.height),
-      new Vector2(borders.getX, borders.getY + borders.height),
-      new Vector2(borders.getX, borders.getY)
-    )
+    areaVertices.addAll(bordersVertices)
     area = getPolygonFromVertices(areaVertices)
 
     initTextures(Color.BLUE, Color.ORANGE)
@@ -128,44 +130,48 @@ class GameField(private val controller: WorldController)
     sparx foreach (_.reset(resetPos))
   }
 
-  def render(batch: SpriteBatch,
-             shaper: ShapeRenderer,
-             polygonBatch: PolygonSpriteBatch) {
-    renderBackground(shaper, polygonBatch)
-    player.render(batch, shaper)
+  def renderObjects(batch: SpriteBatch) {
+    player.render(batch)
     qix.render(batch)
     sparx foreach (_.render(batch))
+    player.render(batch)
   }
+
+  val lineWidth = 3
 
   def renderBackground(shaper: ShapeRenderer,
                        polygonBatch: PolygonSpriteBatch) {
-    shaper.setAutoShapeType(true)
-    shaper.rect(borders.getX, borders.getY,
-      borders.getWidth, borders.getHeight)
-
-    (0 until claimedAreas.size) foreach { i =>
-      renderArea(getFloatArray(claimedAreas.get(i)),
-        shaper, polygonBatch, claimedAreaTypes.get(i))
+    // draw the borders
+    0 until bordersVertices.size - 1 foreach { i =>
+      shaper.rectLine(bordersVertices.get(i), bordersVertices.get(i + 1), lineWidth)
     }
 
-    shaper.setColor(Color.RED)
-    shaper.polygon(getFloatArray(areaVertices))
-    shaper.setColor(Color.WHITE)
+    // draw each claimed polygon
+    0 until claimedAreas.size foreach { i =>
+      renderArea(claimedAreas.get(i),
+        shaper, polygonBatch, claimedAreaTypes.get(i))
+    }
   }
 
-  def renderArea(polygon: scala.Array[Float],
+  def renderArea(polygon: Array[Vector2],
                  shaper: ShapeRenderer,
                  polygonBatch: PolygonSpriteBatch,
                  isSlowArea: Boolean = false) {
+    // draw the filling
+    val floatArray = getFloatArray(polygon)
     val polyReg = new PolygonRegion(new TextureRegion(
       if (isSlowArea) textureSlow
                  else textureFast),
-      polygon.toSeq.toArray,
-      triangulator.computeTriangles(polygon).toArray
+      floatArray,
+      triangulator.computeTriangles(floatArray).toArray
     )
     val poly = new PolygonSprite(polyReg)
     poly.draw(polygonBatch)
-    shaper.polygon(polygon)
+
+    // draw the outline
+    0 until polygon.size - 1 foreach { i =>
+      shaper.rectLine(polygon.get(i), polygon.get(i + 1), lineWidth)
+    }
   }
 
   private def calculateAreaScore(area: Array[Vector2], isSlow: Boolean): Int =

@@ -83,10 +83,7 @@ class Fuse(field: GameField, val player: Player)
     Gdx.app.log(LOG, "finished")
   }
 
-  def render(batch: SpriteBatch, shaper: ShapeRenderer) {
-    // always draw path, fuse is visible while moving only
-    if (state == CHASING || state == WAITING)
-      drawFusePath(shaper)
+  def render(batch: SpriteBatch) {
     if (state == CHASING)
       drawFuse(batch)
   }
@@ -95,13 +92,13 @@ class Fuse(field: GameField, val player: Player)
     fuseParticle.draw(batch)
   }
 
-  private def drawFusePath(shaper: ShapeRenderer) {
-    shaper.setColor(Color.GRAY)
+  def renderPath(shaper: ShapeRenderer) {
+    shaper.setColor(Color.DARK_GRAY)
     if (currentPath != null) {
       for (i <- 0 until currentPath.size - 1) {
-        shaper.line(currentPath.get(i), currentPath.get(i + 1))
+        shaper.rectLine(currentPath.get(i), currentPath.get(i + 1), player.pathWidth)
       }
-      shaper.line(currentPath.peek(), position)
+      shaper.rectLine(currentPath.peek(), position, player.pathWidth)
     }
     shaper.setColor(Color.WHITE)
   }
@@ -129,7 +126,7 @@ class Fuse(field: GameField, val player: Player)
       }
       position.set(newPos)
     }
-    fuseParticle.setPosition(position.x - size, position.y)
+    fuseParticle.setPosition(position.x - 1.2f * size, position.y)
     fuseParticle.update(delta)
   }
 
