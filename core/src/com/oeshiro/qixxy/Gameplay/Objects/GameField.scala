@@ -133,7 +133,7 @@ class GameField(private val controller: WorldController)
              polygonBatch: PolygonSpriteBatch) {
     renderBackground(shaper, polygonBatch)
     player.render(batch, shaper)
-    qix.render(batch, shaper)
+    qix.render(batch)
     sparx foreach (_.render(batch))
   }
 

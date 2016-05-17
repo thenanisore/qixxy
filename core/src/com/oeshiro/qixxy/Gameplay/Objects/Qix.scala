@@ -1,9 +1,8 @@
 package com.oeshiro.qixxy.Gameplay.Objects
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.{Sprite, SpriteBatch, TextureRegion}
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.graphics.{Color, Texture}
 import com.badlogic.gdx.math.{Circle, Vector2}
 import com.badlogic.gdx.utils.Disposable
 
@@ -55,21 +54,16 @@ class Qix(field: GameField)
     s_texture.setScale(0.1f)
   }
 
-  def render(batch: SpriteBatch, shaper: ShapeRenderer) {
-    drawQix(shaper, batch)
-    // TODO Delete
-    shaper.circle(nextPoint.x, nextPoint.y, 1)
+  def render(batch: SpriteBatch) {
+    drawQix(batch)
   }
 
-  private def drawQix(shaper: ShapeRenderer, batch: SpriteBatch) {
-    shaper.setColor(Color.BLUE)
-    shaper.circle(position.x, position.y, size)
-    shaper.setColor(Color.WHITE)
+  private def drawQix(batch: SpriteBatch) {
     s_texture.draw(batch)
   }
 
-  private def rotate(newPos: Vector2) {
-    s_texture.setRotation(newPos.angle())
+  private def rotate(newPos: Vector2, delta: Float) {
+    s_texture.setRotation(s_texture.getRotation + (newPos.angle() - s_texture.getRotation) * delta)
   }
 
   private def checkCollisionWithBorders(pos: Vector2): Boolean =
@@ -90,7 +84,7 @@ class Qix(field: GameField)
           .nor()
           .scl(velocity.len() * delta)
         val newPos = position.cpy().add(vel)
-        rotate(vel)
+        rotate(vel, delta)
         if (checkCollisionWithBorders(newPos)) {
           state = SLEEPING
           nextPoint.set(position)
