@@ -22,7 +22,8 @@ class WorldController(private val game: Qixxy)
   val timer = new Timer()
 
   var isPaused: Boolean = _
-  val loseDelay = 2000
+  val loseDelay = 3000
+  val endDelay = 4000
 
   def isGameOver: Boolean = lives < 0
   def isWin: Boolean = claimed >= 75.0f
@@ -83,7 +84,14 @@ class WorldController(private val game: Qixxy)
 
   def lose() {
     Gdx.app.log(LOG, "you lose")
-    backToMenu()
+    timer.clear()
+    timer.postTask(new Task {
+      override def run() {
+        backToMenu()
+      }
+    })
+    timer.delay(endDelay)
+    timer.start()
   }
 
   def win() {
@@ -97,7 +105,7 @@ class WorldController(private val game: Qixxy)
         backToMenu()
       }
     })
-    timer.delay(loseDelay)
+    timer.delay(endDelay)
     timer.start()
   }
 
