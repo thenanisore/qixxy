@@ -361,6 +361,7 @@ class GameField(private val controller: WorldController)
 
   override def dispose() {
     pix.dispose()
+    qix.dispose()
     player.dispose()
     sparx foreach (_.dispose())
     textureFast.dispose()

@@ -178,7 +178,7 @@ class Player(field: GameField)
     changeDirection(DOWN)
   }
 
-  val rotations = HashMap("UP" -> 90, "LEFT" -> 0, "DOWN" -> 270, "RIGHT" -> 0)
+  private val rotations = HashMap("UP" -> 90, "LEFT" -> 0, "DOWN" -> 270, "RIGHT" -> 0)
 
   private def rotate() {
     s_texture.setRotation(rotations(direction.toString))

@@ -1,13 +1,20 @@
 package com.oeshiro.qixxy.Gameplay.Objects
 
-import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.g2d.{Sprite, SpriteBatch, TextureRegion}
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.graphics.{Color, Texture}
 import com.badlogic.gdx.math.{Circle, Vector2}
+import com.badlogic.gdx.utils.Disposable
 
-class Qix(field: GameField) extends GameFieldObject(field) {
+class Qix(field: GameField)
+  extends GameFieldObject(field) with Disposable {
 
   val LOG = classOf[Qix].getSimpleName
+
+  var texture: Texture = _
+  var s_texture: Sprite = _
+  val pixelSize = 50
 
   sealed abstract class QIX_STATE
   case object SLEEPING extends QIX_STATE
@@ -35,19 +42,34 @@ class Qix(field: GameField) extends GameFieldObject(field) {
     terminalVelocity.set(speed, speed)
     state = SLEEPING
     nextPoint = new Vector2()
+
+    initSprites()
+
     position.set(startingPosition)
     velocity.set(terminalVelocity)
   }
 
+  def initSprites() {
+    texture = new Texture(Gdx.files.internal("raw/qix.png"))
+    s_texture = new Sprite(new TextureRegion(texture))
+    s_texture.setScale(0.1f)
+  }
+
   def render(batch: SpriteBatch, shaper: ShapeRenderer) {
-    drawQix(shaper)
+    drawQix(shaper, batch)
+    // TODO Delete
     shaper.circle(nextPoint.x, nextPoint.y, 1)
   }
 
-  private def drawQix(shaper: ShapeRenderer) {
+  private def drawQix(shaper: ShapeRenderer, batch: SpriteBatch) {
     shaper.setColor(Color.BLUE)
     shaper.circle(position.x, position.y, size)
     shaper.setColor(Color.WHITE)
+    s_texture.draw(batch)
+  }
+
+  private def rotate(newPos: Vector2) {
+    s_texture.setRotation(newPos.angle())
   }
 
   private def checkCollisionWithBorders(pos: Vector2): Boolean =
@@ -68,6 +90,7 @@ class Qix(field: GameField) extends GameFieldObject(field) {
           .nor()
           .scl(velocity.len() * delta)
         val newPos = position.cpy().add(vel)
+        rotate(vel)
         if (checkCollisionWithBorders(newPos)) {
           state = SLEEPING
           nextPoint.set(position)
@@ -79,5 +102,10 @@ class Qix(field: GameField) extends GameFieldObject(field) {
         }
         position.set(newPos)
     }
+    s_texture.setPosition(position.x - pixelSize * 4.8f, position.y - pixelSize * 4.8f)
+  }
+
+  override def dispose() {
+    texture.dispose()
   }
 }
