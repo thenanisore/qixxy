@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.{Sprite, SpriteBatch, TextureRegion}
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.{Circle, Intersector, Vector2}
 import com.badlogic.gdx.utils.{Array, Disposable}
+import com.oeshiro.qixxy.Utils._
 
 import scala.collection.JavaConversions._
 import scala.collection.immutable.HashMap
@@ -41,7 +42,11 @@ class Player(field: GameField)
   override val startingPosition = new Vector2((
     field.areaVertices.get(0).x + field.areaVertices.get(1).x) / 2f,
     field.areaVertices.get(0).y)
-  val speed = 150
+  val speed = field.dif match {
+    case EASY => 150
+    case NORMAL => 125
+    case HARD => 100
+  }
 
   var state: PLAYER_STATE = _
   var direction: DIRECTION_STATE = _

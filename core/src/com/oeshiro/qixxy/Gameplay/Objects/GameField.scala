@@ -8,26 +8,28 @@ import com.badlogic.gdx.math._
 import com.badlogic.gdx.utils.Timer.Task
 import com.badlogic.gdx.utils.{Array, Disposable, Timer}
 import com.oeshiro.qixxy.Gameplay.WorldController
-import com.oeshiro.qixxy.Utils
+import com.oeshiro.qixxy.Utils._
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 
-class GameField(private val controller: WorldController)
+class GameField(val controller: WorldController)
   extends Disposable {
 
   val LOG = classOf[GameField].getSimpleName
+
+  val dif = controller.dif
 
   var player: Player = _
   var qix: Qix = _
   var sparx: Array[Spark] = _
 
   val MARGIN = 10f
-  val UI_MARGIN = Utils.viewportWidth * 0.25f + 10f
+  val UI_MARGIN = viewportWidth * 0.25f + 10f
 
   val borders = new Rectangle(MARGIN, MARGIN,
-    Utils.viewportWidth - UI_MARGIN,
-    Utils.viewportHeight - 2f * MARGIN)
+    viewportWidth - UI_MARGIN,
+    viewportHeight - 2f * MARGIN)
   val bordersVertices = new Array[Vector2]()
   bordersVertices.addAll(
     new Vector2(borders.getX, borders.getY),
@@ -184,7 +186,7 @@ class GameField(private val controller: WorldController)
 
   private def findNearestVertex(pos: Vector2): Int = {
     var imin = 0
-    var dist, min = Utils.viewportWidth
+    var dist, min = viewportWidth
     for (i <- 0 until areaVertices.size) {
       dist = areaVertices.get(i).dst2(pos)
       if (dist < min) {
@@ -314,7 +316,7 @@ class GameField(private val controller: WorldController)
     val mins = new Array[Float]
     val imins = new Array[Int]
     0 until points.size foreach (_ => {
-      mins.add(Utils.viewportWidth)
+      mins.add(viewportWidth)
       imins.add(0)
     })
     var distance = 0f

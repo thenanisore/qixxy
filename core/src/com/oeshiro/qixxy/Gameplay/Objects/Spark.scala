@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.{ParticleEffect, SpriteBatch}
 import com.badlogic.gdx.math.{Circle, Intersector, Vector2}
 import com.badlogic.gdx.utils.{Array, Disposable}
+import com.oeshiro.qixxy.Utils._
 
 class Spark(field: GameField, var isClockwise: Boolean)
   extends GameFieldObject(field) with Disposable {
@@ -47,7 +48,13 @@ class Spark(field: GameField, var isClockwise: Boolean)
 
     needUpdate = false
     // terminal velocity equals to the player's normal one
-    terminalVelocity.set(field.player.terminalVelocity.cpy().scl(0.75f))
+    val speed = field.player.terminalVelocity.cpy()
+    field.dif match {
+      case EASY => speed.scl(0.8f)
+      case NORMAL => speed.scl(1.2f)
+      case HARD => speed.scl(1.5f)
+    }
+    terminalVelocity.set(speed)
     velocity.set(terminalVelocity)
   }
 

@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.{Sprite, SpriteBatch, TextureRegion}
 import com.badlogic.gdx.math.{Circle, Vector2}
 import com.badlogic.gdx.utils.Disposable
+import com.oeshiro.qixxy.Utils._
 
 class Qix(field: GameField)
   extends GameFieldObject(field) with Disposable {
@@ -22,7 +23,11 @@ class Qix(field: GameField)
   var state: QIX_STATE = _
   var nextPoint: Vector2 = _
   override val size: Float = super.size * 4f
-  val speed = 100
+  val speed = field.dif match {
+    case EASY => 100
+    case NORMAL => 150
+    case HARD => 200
+  }
 
   val bounds = new Circle(position, size)
   override def getBounds: Circle = {

@@ -29,7 +29,7 @@ class MainMenuScreen(private val game: Qixxy)
   private val menuItems = new Array[MenuItem]
   menuItems.addAll(
     new MenuItem("New game", NEW_GAME),
-    //    new MenuItem("Settings", SETTINGS),
+    new MenuItem("Options", OPTIONS),
     //    new MenuItem("Leaderboard", LEADERBOARD),
     new MenuItem("Help", HELP),
     new MenuItem("Exit", EXIT)
@@ -99,9 +99,9 @@ class MainMenuScreen(private val game: Qixxy)
     menuItems.get(selected).role match {
       case NEW_GAME =>
         game.setScreen(new GameScreen(game))
-      case LEADERBOARD =>
-        game.setScreen(new RecordsScreen(game))
-      case SETTINGS =>
+      //      case LEADERBOARD =>
+      //        game.setScreen(new RecordsScreen(game))
+      case OPTIONS =>
         game.setScreen(new OptionsScreen(game))
       case HELP =>
         game.setScreen(new HelpScreen(game))
@@ -151,7 +151,8 @@ class MainMenuScreen(private val game: Qixxy)
   // enumeration of menu items
   sealed abstract class MenuRole
   case object NEW_GAME extends MenuRole
-  case object SETTINGS extends MenuRole
+
+  case object OPTIONS extends MenuRole
   case object LEADERBOARD extends MenuRole
   case object HELP extends MenuRole
   case object EXIT extends MenuRole

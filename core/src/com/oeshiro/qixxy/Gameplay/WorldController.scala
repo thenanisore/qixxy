@@ -5,13 +5,22 @@ import com.badlogic.gdx.utils.Timer.Task
 import com.badlogic.gdx.utils.{Disposable, Timer}
 import com.badlogic.gdx.{Gdx, InputAdapter}
 import com.oeshiro.qixxy.Gameplay.Objects.GameField
+import com.oeshiro.qixxy.Qixxy
 import com.oeshiro.qixxy.Screens.MainMenuScreen
-import com.oeshiro.qixxy.{Qixxy, Utils}
+import com.oeshiro.qixxy.Utils._
 
 class WorldController(private val game: Qixxy)
   extends InputAdapter with Disposable {
 
   val LOG = classOf[WorldController].getSimpleName
+
+  val options = Gdx.app.getPreferences("options")
+  val dif = options.getString("difficulty", "normal") match {
+    case "easy" => EASY
+    case "normal" => NORMAL
+    case "hard" => HARD
+  }
+  Gdx.app.log(LOG, options.getString("difficulty", "normal"))
 
   var field: GameField = _
   var lives: Int = _
@@ -26,7 +35,12 @@ class WorldController(private val game: Qixxy)
   val endDelay = 4000
 
   def isGameOver: Boolean = lives < 0
-  def isWin: Boolean = claimed >= 75.0f
+
+  def isWin: Boolean = dif match {
+    case EASY => claimed >= 65f
+    case NORMAL => claimed >= 75f
+    case HARD => claimed >= 90f
+  }
 
   init()
 
@@ -35,7 +49,7 @@ class WorldController(private val game: Qixxy)
     field = new GameField(this)
     score = 0
     claimed = 0
-    lives = Utils.livesStart
+    lives = livesStart
     isPaused = false
 
     scoreVisual = score
@@ -73,7 +87,7 @@ class WorldController(private val game: Qixxy)
     timer.postTask(new Task {
       override def run() {
         // check game over conditions
-        if (isGameOver) lose()
+        if (isGameOver) lose(endDelay)
         field.reset()
         isPaused = false
       }
@@ -82,7 +96,7 @@ class WorldController(private val game: Qixxy)
     timer.start()
   }
 
-  def lose() {
+  def lose(delay: Int) {
     isPaused = true
     Gdx.app.log(LOG, "you lose")
     timer.clear()
@@ -91,7 +105,7 @@ class WorldController(private val game: Qixxy)
         backToMenu()
       }
     })
-    timer.delay(endDelay)
+    timer.delay(delay)
     timer.start()
   }
 
@@ -122,6 +136,10 @@ class WorldController(private val game: Qixxy)
   }
 
   private def handleInput(delta: Float) {
+    if (Gdx.input.isKeyPressed(Keys.ESCAPE)) {
+      lose(0)
+    }
+
     if ((Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)
       || Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT)))
     {

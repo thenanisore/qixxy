@@ -20,6 +20,15 @@ object Utils {
   val livesStart = 3
   val preferences = "qixxy.prefs"
 
+  // difficulty levels
+  sealed abstract class DIFFICULTY
+
+  case object EASY extends DIFFICULTY
+
+  case object NORMAL extends DIFFICULTY
+
+  case object HARD extends DIFFICULTY
+
   // generates a bitmap font from a ttf
   def initializeFont(path: String, size: Int=16, color: Color=Color.WHITE): BitmapFont = {
     val generator = new FreeTypeFontGenerator(Gdx.files.internal(path))

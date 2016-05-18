@@ -15,7 +15,6 @@ class HelpScreen(private val game: Qixxy)
     Utils.viewportHeight)
 
   var batch: SpriteBatch = _
-  var bg: Texture = _
   var help1: Texture = _
   var help2: Texture = _
 
@@ -27,7 +26,6 @@ class HelpScreen(private val game: Qixxy)
 
   def init() {
     batch = new SpriteBatch()
-    bg = new Texture(Gdx.files.internal("raw/space.png"))
     help1 = new Texture(Gdx.files.internal("raw/help_1.png"))
     help2 = new Texture(Gdx.files.internal("raw/help_2.png"))
     selectedPage = 1
@@ -61,7 +59,6 @@ class HelpScreen(private val game: Qixxy)
     batch.dispose()
     help1.dispose()
     help2.dispose()
-    bg.dispose()
     textFont.dispose()
   }
 
