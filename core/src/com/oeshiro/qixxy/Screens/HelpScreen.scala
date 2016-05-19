@@ -5,6 +5,11 @@ import com.badlogic.gdx.graphics.{Color, OrthographicCamera, Texture}
 import com.badlogic.gdx.{Gdx, Input}
 import com.oeshiro.qixxy.{Qixxy, Utils}
 
+/**
+  * Containing the assets and logic of the help screen.
+  *
+  * @param game - a reference to the game class.
+  */
 class HelpScreen(private val game: Qixxy)
   extends AbstractGameScreen(game) {
 

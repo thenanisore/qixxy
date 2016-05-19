@@ -7,6 +7,12 @@ import com.badlogic.gdx.graphics.{Color, OrthographicCamera, Texture}
 import com.badlogic.gdx.utils.Disposable
 import com.oeshiro.qixxy.Utils
 
+/**
+  * Constantly renders the game world after
+  * updating it by the controller.
+  *
+  * @param wController - a reference to the world controller.
+  */
 class WorldRenderer(private val wController: WorldController)
   extends Disposable {
 
@@ -110,7 +116,8 @@ class WorldRenderer(private val wController: WorldController)
     itemFont.draw(guiBatch, claimed_ui, x - layout.width * 0.5f, y)
     y -= 40
 
-    val claimed = wController.claimed.asInstanceOf[Int].toString + "%"
+    val claimed = wController.claimed.asInstanceOf[Int].toString +
+      "%|" + wController.winPercent.asInstanceOf[Int] + "%"
     layout.setText(itemFont, claimed)
     itemFont.draw(guiBatch, claimed, x - layout.width * 0.5f, y)
     y -= 200

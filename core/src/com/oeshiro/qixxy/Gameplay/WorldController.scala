@@ -9,6 +9,12 @@ import com.oeshiro.qixxy.Qixxy
 import com.oeshiro.qixxy.Screens.MainMenuScreen
 import com.oeshiro.qixxy.Utils._
 
+/**
+  * Constantly updates the game world parameters
+  * and checks for win/lose conditions.
+  *
+  * @param game - a reference to the game class.
+  */
 class WorldController(private val game: Qixxy)
   extends InputAdapter with Disposable {
 
@@ -36,11 +42,13 @@ class WorldController(private val game: Qixxy)
 
   def isGameOver: Boolean = lives < 0
 
-  def isWin: Boolean = dif match {
-    case EASY => claimed >= 65f
-    case NORMAL => claimed >= 75f
-    case HARD => claimed >= 90f
+  def winPercent = dif match {
+    case EASY => 65f
+    case NORMAL => 75f
+    case HARD => 90f
   }
+
+  def isWin: Boolean = claimed >= winPercent
 
   init()
 
@@ -61,13 +69,9 @@ class WorldController(private val game: Qixxy)
       handleDebugInput(delta)
       if (!isGameOver && !isWin) {
         handleInput(delta)
+        field.update(delta)
       }
-      field.update(delta)
     }
-    if (livesVisual > lives)
-      livesVisual = Math.max(lives, livesVisual - 1 * delta)
-    if (scoreVisual < score)
-      scoreVisual = Math.min(score, scoreVisual + 250 * delta)
   }
 
   def updateScore(addScore: Int, addPercentage: Float) {

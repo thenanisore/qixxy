@@ -7,6 +7,12 @@ import com.badlogic.gdx.math.{Circle, Vector2}
 import com.badlogic.gdx.utils.Disposable
 import com.oeshiro.qixxy.Utils._
 
+/**
+  * A class representing a qix, containing all qix
+  * rendering and updating algorithms.
+  *
+  * @param field - a reference to the game field.
+  */
 class Qix(field: GameField)
   extends GameFieldObject(field) with Disposable {
 

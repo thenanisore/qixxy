@@ -13,6 +13,13 @@ import com.oeshiro.qixxy.Utils._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 
+/**
+  * A class representing the game field, containing
+  * other game objects and all the information
+  * about itself.
+  *
+  * @param controller - a reference to the world controller.
+  */
 class GameField(val controller: WorldController)
   extends Disposable {
 
@@ -116,9 +123,9 @@ class GameField(val controller: WorldController)
   private def testCollisions() {
     val collision =
       player.checkFuse() ||
-      player.checkCollision(qix) ||
-      player.checkPathCollision(qix) ||
-      sparx.exists(player.checkCollision(_))
+        (player.checkCollision(qix) && player.isDrawing) ||
+        player.checkPathCollision(qix) ||
+        sparx.exists(player.checkCollision(_))
 
     if (collision && !controller.isPaused) {
       controller.loseLife()

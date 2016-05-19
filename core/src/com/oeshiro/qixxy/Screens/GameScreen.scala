@@ -4,6 +4,11 @@ import com.badlogic.gdx.Gdx
 import com.oeshiro.qixxy.Gameplay.{WorldController, WorldRenderer}
 import com.oeshiro.qixxy.Qixxy
 
+/**
+  * Containing the controllers and renderers of the game screen.
+  *
+  * @param game - a reference to the game class.
+  */
 class GameScreen(private val game: Qixxy)
   extends AbstractGameScreen(game) {
 

@@ -4,6 +4,11 @@ import com.badlogic.gdx.math._
 import com.badlogic.gdx.utils.Array
 import com.oeshiro.qixxy.Utils
 
+/**
+  * A base class for game objects, like players and enemies.
+  *
+  * @param field - a reference to the game field.
+  */
 abstract class GameFieldObject(val field: GameField) {
 
   def size: Float = 6f

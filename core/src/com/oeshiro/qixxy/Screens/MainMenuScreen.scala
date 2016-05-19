@@ -8,6 +8,11 @@ import com.oeshiro.qixxy.{Qixxy, Utils}
 
 import scala.collection.JavaConversions._
 
+/**
+  * Containing the assets and logic of the main menu.
+  *
+  * @param game - a reference to the game class.
+  */
 class MainMenuScreen(private val game: Qixxy)
   extends AbstractGameScreen(game) {
 

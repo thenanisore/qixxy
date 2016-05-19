@@ -11,6 +11,12 @@ import com.oeshiro.qixxy.Utils._
 import scala.collection.JavaConversions._
 import scala.collection.immutable.HashMap
 
+/**
+  * A class representing a player, containing all player
+  * rendering and updating algorithms.
+  *
+  * @param field - a reference to the game field.
+  */
 class Player(field: GameField)
   extends GameFieldObject(field) with Disposable {
 
@@ -128,6 +134,8 @@ class Player(field: GameField)
 
   def isStoppedDrawing: Boolean =
     state.isInstanceOf[DRAWING] && velocity.x == 0 && velocity.y == 0
+
+  def isDrawing: Boolean = state.isInstanceOf[DRAWING]
 
   private def changeDirection(dir: DIRECTION_STATE) {
     if (dir != direction) {

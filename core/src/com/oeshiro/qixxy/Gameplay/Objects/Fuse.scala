@@ -8,6 +8,12 @@ import com.badlogic.gdx.math.{Circle, Vector2}
 import com.badlogic.gdx.utils.Timer.Task
 import com.badlogic.gdx.utils.{Array, Disposable, Timer}
 
+/**
+  * A class representing a fuse, containing all fuse
+  * rendering and updating algorithms.
+  *
+  * @param field - a reference to the game field.
+  */
 class Fuse(field: GameField, val player: Player)
   extends GameFieldObject(field) with Disposable {
 

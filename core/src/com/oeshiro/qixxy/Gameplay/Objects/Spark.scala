@@ -6,6 +6,12 @@ import com.badlogic.gdx.math.{Circle, Intersector, Vector2}
 import com.badlogic.gdx.utils.{Array, Disposable}
 import com.oeshiro.qixxy.Utils._
 
+/**
+  * A class representing a spark, containing all spark
+  * rendering and updating algorithms.
+  *
+  * @param field - a reference to the game field.
+  */
 class Spark(field: GameField, var isClockwise: Boolean)
   extends GameFieldObject(field) with Disposable {
 

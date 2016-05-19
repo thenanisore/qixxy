@@ -5,6 +5,12 @@ import com.badlogic.gdx.graphics.{Color, OrthographicCamera}
 import com.badlogic.gdx.{Gdx, Input}
 import com.oeshiro.qixxy.{Qixxy, Utils}
 
+/**
+  * Containing the assets and logic of the leaderboard screen.
+  *
+  * @param game - a reference to the game class.
+  * @todo implement
+  */
 class RecordsScreen(private val game: Qixxy)
   extends AbstractGameScreen(game) {
 

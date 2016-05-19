@@ -4,6 +4,11 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.{Gdx, Screen}
 import com.oeshiro.qixxy.Qixxy
 
+/**
+  * Abstract class for game screens of the game.
+  *
+  * @param game - a reference to the game class.
+  */
 abstract class AbstractGameScreen(private val game: Qixxy)
   extends Screen {
 

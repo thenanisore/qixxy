@@ -5,6 +5,11 @@ import com.badlogic.gdx.graphics.{Color, OrthographicCamera, Texture}
 import com.badlogic.gdx.{Gdx, Input, Preferences}
 import com.oeshiro.qixxy.{Qixxy, Utils}
 
+/**
+  * Containing the assets and logic of the options screen.
+  *
+  * @param game - a reference to the game class.
+  */
 class OptionsScreen(private val game: Qixxy)
   extends AbstractGameScreen(game) {
 
