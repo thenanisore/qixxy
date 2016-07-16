@@ -35,7 +35,6 @@ class MainMenuScreen(private val game: Qixxy)
   menuItems.addAll(
     new MenuItem("New game", NEW_GAME),
     new MenuItem("Options", OPTIONS),
-    //    new MenuItem("Leaderboard", LEADERBOARD),
     new MenuItem("Help", HELP),
     new MenuItem("Exit", EXIT)
   )
@@ -104,8 +103,6 @@ class MainMenuScreen(private val game: Qixxy)
     menuItems.get(selected).role match {
       case NEW_GAME =>
         game.setScreen(new GameScreen(game))
-      //      case LEADERBOARD =>
-      //        game.setScreen(new RecordsScreen(game))
       case OPTIONS =>
         game.setScreen(new OptionsScreen(game))
       case HELP =>
@@ -166,9 +163,6 @@ class MainMenuScreen(private val game: Qixxy)
     def isSelected: Boolean = menuItems.get(selected).eq(this)
 
     def label: String = _label
-
-    /*if (isSelected) "> " + _label + " <"
-                            else _label*/
     val rawLabel = _label
   }
 }

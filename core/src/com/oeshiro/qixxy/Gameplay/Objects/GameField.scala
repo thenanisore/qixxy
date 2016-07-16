@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.graphics.{Color, Pixmap, Texture}
 import com.badlogic.gdx.math._
-import com.badlogic.gdx.utils.Timer.Task
 import com.badlogic.gdx.utils.{Array, Disposable, Timer}
 import com.oeshiro.qixxy.Gameplay.WorldController
 import com.oeshiro.qixxy.Utils._
@@ -93,17 +92,15 @@ class GameField(val controller: WorldController)
   }
 
   private def addSparx() {
-    // TODO OBJECT POOL
     sparx.addAll(new Spark(this, true), new Spark(this, false))
-    timer.postTask(new Task {
-      override def run() { sparx foreach (_.start()) }
+    timer.postTask(() => {
+      sparx foreach (_.start())
     })
     timer.delay(sparxDelayTime)
     timer.start()
   }
 
   private def clearSparx() {
-    // TODO OBJECT POOL
     sparx.clear()
   }
 
@@ -218,7 +215,6 @@ class GameField(val controller: WorldController)
   }
 
   def alignPath(path: Array[Vector2], pos: Vector2) {
-    // TODO fix it
     val last = getExactPoint(pos)
     val imin = findNearestVertex(last)
     if (!pos.epsilonEquals(last, 0.01f) && areaVertices.get(imin).dst2(pos) < Math.pow(0.5f * player.size, 2)) {
