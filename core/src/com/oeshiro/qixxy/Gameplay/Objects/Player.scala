@@ -169,7 +169,6 @@ class Player(field: GameField)
           isBack = false
           return
         }
-        if (isTurned) Gdx.app.log(LOG, s"turned from $direction to $dir")
       }
       direction = dir
       rotate()

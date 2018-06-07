@@ -12,7 +12,6 @@ class Qixxy extends Game {
   val LOG = classOf[Qixxy].getSimpleName
 
   override def create() {
-    Gdx.app.log(LOG, "Creating game")
     setScreen(new MainMenuScreen(this))
   }
 }

@@ -31,7 +31,6 @@ class WorldController(private val game: Qixxy)
     case "normal" => NORMAL
     case "hard" => HARD
   }
-  Gdx.app.log(LOG, options.getString("difficulty", "normal"))
 
   var field: GameField = _
   var lives: Int = _
@@ -82,8 +81,6 @@ class WorldController(private val game: Qixxy)
   def updateScore(addScore: Int, addPercentage: Float) {
     score += addScore
     claimed += addPercentage
-    Gdx.app.log(LOG, s"new score $score")
-    Gdx.app.log(LOG, s"claimed $claimed")
 
     // check win conditions
     if (isWin) win()
@@ -107,7 +104,6 @@ class WorldController(private val game: Qixxy)
 
   def lose(delay: Int) {
     isPaused = true
-    Gdx.app.log(LOG, "you lose")
     timer.clear()
     timer.postTask(new Task {
       override def run() {
@@ -120,7 +116,6 @@ class WorldController(private val game: Qixxy)
 
   def win() {
     isPaused = true
-    Gdx.app.log(LOG, "you win, congratulations")
     timer.clear()
     timer.postTask(new Task {
       override def run() {
