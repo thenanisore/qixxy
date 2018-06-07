@@ -5,7 +5,7 @@ import com.oeshiro.qixxy.Gameplay.{WorldController, WorldRenderer}
 import com.oeshiro.qixxy.Qixxy
 
 /**
-  * Containing the controllers and renderers of the game screen.
+  * The GameScreen class contains the controllers and renderers of a game screen.
   *
   * @param game - a reference to the game class.
   */

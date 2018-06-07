@@ -12,8 +12,8 @@ import scala.collection.JavaConversions._
 import scala.collection.immutable.HashMap
 
 /**
-  * A class representing a player, containing all player
-  * rendering and updating algorithms.
+  * The Player class represents a player, containing all
+  * player rendering and updating algorithms.
   *
   * @param field - a reference to the game field.
   */
@@ -241,22 +241,17 @@ class Player(field: GameField)
     }
     path.add(field.getExactPoint(position))
     fuse.start()
-
-    Gdx.app.log(LOG, "state changed to DRAWING")
-    Gdx.app.log(LOG, s"started at ${path.first()}")
   }
 
   private def continueDrawing(delta: Float) {
     if (isTurned && isReady) {
       path.add(position.cpy())
-      Gdx.app.log(LOG, s"add $position")
       isTurned = false
     }
   }
 
   private def finishDrawing(delta: Float, newPos: Vector2) {
     field.alignPath(path, newPos)
-    Gdx.app.log(LOG, s"finished at ${path.peek()}")
     updatePosition(path.peek(), needAlign = true)
     field.processPath(path, state == DRAWING_SLOW)
     state = NOT_DRAWING
@@ -266,9 +261,6 @@ class Player(field: GameField)
     fuse.finish()
     resetSlow()
     stop()
-
-    Gdx.app.log(LOG, "state changed to NOT_DRAWING")
-    Gdx.app.log(LOG, s"now areas: ${field.claimedAreas.size}")
   }
 
   private def drawPlayer(batch: SpriteBatch) {
@@ -326,7 +318,6 @@ class Player(field: GameField)
     isSlow = false
     isFast = true
     stop()
-    Gdx.app.log(LOG, "reset")
   }
 
   override def update(delta: Float) {
@@ -346,7 +337,6 @@ class Player(field: GameField)
           updatePosition(newPos, needAlign = true)
         } else {
           if (isReady && inArea) {
-            Gdx.app.log(LOG, s"position old $newPos")
             updatePosition(delta, needAlign = true)
             startDrawing(delta)
           } else {

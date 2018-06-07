@@ -13,9 +13,8 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * A class representing the game field, containing
-  * other game objects and all the information
-  * about itself.
+  * The GameField class representing the game field, containing
+  * other game objects and all the information about itself.
   *
   * @param controller - a reference to the world controller.
   */
@@ -76,8 +75,6 @@ class GameField(val controller: WorldController)
     sparx = new Array[Spark]()
     timer = new Timer()
     addSparx()
-
-    Gdx.app.log(LOG, "level loaded")
   }
 
   private def initTextures(colorFast: Color, colorSlow: Color) {
@@ -126,7 +123,6 @@ class GameField(val controller: WorldController)
 
     if (collision && !controller.isPaused) {
       controller.loseLife()
-      Gdx.app.log(LOG, "you lost life")
     }
   }
 
@@ -298,9 +294,6 @@ class GameField(val controller: WorldController)
       calculateAreaScore(claimedAreas.peek(), isSlow),
       calculateAreaPercentage(claimedAreas.peek()))
     sparx foreach (_.updatePath())
-
-    Gdx.app.log(LOG, p_first.toString())
-    Gdx.app.log(LOG, p_second.toString())
   }
 
   def getPath(start: Int, end: Int): Array[Vector2] = {

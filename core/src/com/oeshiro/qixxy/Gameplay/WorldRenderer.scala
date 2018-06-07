@@ -8,8 +8,8 @@ import com.badlogic.gdx.utils.Disposable
 import com.oeshiro.qixxy.Utils
 
 /**
-  * Constantly renders the game world after
-  * updating it by the controller.
+  * The WorldRenderer class constantly renders the game world after
+  * the world controller has updated it.
   *
   * @param wController - a reference to the world controller.
   */
@@ -31,8 +31,6 @@ class WorldRenderer(private val wController: WorldController)
   var bg_t: Texture = _
 
   init()
-
-  Gdx.app.log(LOG, "started")
 
   private def init() {
     itemFont = Utils.initializeFont(Utils.fontArcade, 26, Color.valueOf("a8afff"))

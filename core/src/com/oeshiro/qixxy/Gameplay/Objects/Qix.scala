@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.Disposable
 import com.oeshiro.qixxy.Utils._
 
 /**
-  * A class representing a qix, containing all qix
+  * The Qix class represents a Qix, containing all qix
   * rendering and updating algorithms.
   *
   * @param field - a reference to the game field.

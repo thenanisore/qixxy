@@ -5,9 +5,10 @@ import com.badlogic.gdx.{Gdx, Screen}
 import com.oeshiro.qixxy.Qixxy
 
 /**
-  * Abstract class for game screens of the game.
+  * The AbstractGameScreen class is an abstract class
+  * for game screens.
   *
-  * @param game - a reference to the game class.
+  * @param game - a reference to the main game class.
   */
 abstract class AbstractGameScreen(private val game: Qixxy)
   extends Screen {

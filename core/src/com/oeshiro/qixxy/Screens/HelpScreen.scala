@@ -6,7 +6,7 @@ import com.badlogic.gdx.{Gdx, Input}
 import com.oeshiro.qixxy.{Qixxy, Utils}
 
 /**
-  * Containing the assets and logic of the help screen.
+  * The HelpScreen class contains the assets and logic of the help screen.
   *
   * @param game - a reference to the game class.
   */

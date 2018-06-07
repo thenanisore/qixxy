@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Timer.Task
 import com.badlogic.gdx.utils.{Array, Disposable, Timer}
 
 /**
-  * A class representing a fuse, containing all fuse
+  * The Fuse class represents a fuse, containing all fuse
   * rendering and updating algorithms.
   *
   * @param field - a reference to the game field.
@@ -61,7 +61,6 @@ class Fuse(field: GameField, val player: Player)
             currentPath.add(player.path.first())
             fuseParticle.reset()
             state = WAITING
-            Gdx.app.log(LOG, "started")
           }
         }
       })
@@ -85,8 +84,6 @@ class Fuse(field: GameField, val player: Player)
     fuseParticle.allowCompletion()
     velocity.setZero()
     currentPath.clear()
-
-    Gdx.app.log(LOG, "finished")
   }
 
   def render(batch: SpriteBatch) {
@@ -128,7 +125,6 @@ class Fuse(field: GameField, val player: Player)
       if (!isNearPlayer && vel.len2() >= nextPoint.cpy().sub(position).len2()) {
         newPos.set(nextPoint.cpy())
         currentPath.add(newPos.cpy())
-        Gdx.app.log(LOG, "add new vertex")
       }
       position.set(newPos)
     }

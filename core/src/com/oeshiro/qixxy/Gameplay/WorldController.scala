@@ -10,7 +10,7 @@ import com.oeshiro.qixxy.Screens.MainMenuScreen
 import com.oeshiro.qixxy.Utils._
 
 /**
-  * Constantly updates the game world parameters
+  * The WorldController class constantly updates the game world parameters
   * and checks for win/lose conditions.
   *
   * @param game - a reference to the game class.

@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.{Array, Disposable}
 import com.oeshiro.qixxy.Utils._
 
 /**
-  * A class representing a spark, containing all spark
+  * The Spark class represents a spark, containing all spark
   * rendering and updating algorithms.
   *
   * @param field - a reference to the game field.

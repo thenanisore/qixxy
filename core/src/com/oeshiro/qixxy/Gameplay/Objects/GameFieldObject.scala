@@ -5,7 +5,8 @@ import com.badlogic.gdx.utils.Array
 import com.oeshiro.qixxy.Utils
 
 /**
-  * A base class for game objects, like players and enemies.
+  * The GameField class is a base class for game objects,
+  * like players and enemies.
   *
   * @param field - a reference to the game field.
   */

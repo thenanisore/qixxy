@@ -1,10 +1,26 @@
 # Qixxy
 
-**Qixxy** is a Qix-clone game for PC. The goal is to claim as much playfield as you can (not less than a certain treshold depending on the difficulty) by flying around in your fancy spaceship and drawing lines and shapes, desperately trying to survive and defend your galaxy from merciless alien invaders. It is a new version of the classic arcade video game Qix, written completely in Scala with the LibGDX framework.
+**Qixxy** is a Qix-clone game for PC. You can read more about Qix [here](https://en.wikipedia.org/wiki/Qix).
 
-The app was written as a coursework in 2015, so it isn't maintained.
+The goal is to fence off a supermajority of the playfield while trying to stay alive and gain as much points as you can.
+
+This project is licensed under [the MIT License](./LICENSE).
+
+## Disclaimers
+
+The app was written as a university project in 2016 as a way to learn some Scala and game development. I don't update or maintain it.
+
+## Building
+
+You should have Java 6+ on your computer.
+
+1.  `git clone https://github.com/oeshiro/qixxy.git`
+2.  `cd qixxy`
+3.  Build it with Gradle: `./gradlew desktop:dist`
+4.  The `.jar` file should be generated under `desktop/build/libs/desktop-*.jar`
+5.  Run it: `java -jar desktop-*.jar`
+6.  Have fun!
 
 ## Screenshots
-![Main Menu](screenshots/main_menu.png?raw=true "Main Menu")
----
-![Gameplay](screenshots/gameplay.png?raw=true "Gameplay")
+
+![Gameplay](screenshots/gameplay.png?raw=true 'Gameplay')
