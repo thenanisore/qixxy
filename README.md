@@ -23,4 +23,4 @@ You should have Java 6+ on your computer.
 
 ## Screenshots
 
-![Gameplay](screenshots/gameplay.png?raw=true 'Gameplay')
+<img src="screenshots/gameplay.png" alt="Gameplay" width="750" />
