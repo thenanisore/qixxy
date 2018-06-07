@@ -1,3 +1,8 @@
+/*
+ * Copyright © 2016 Oleg Ivanov
+ * Licensed under the MIT license.
+ */
+
 package com.oeshiro.qixxy.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;

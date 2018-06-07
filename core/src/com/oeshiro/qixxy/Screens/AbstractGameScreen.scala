@@ -1,3 +1,8 @@
+/*
+ * Copyright © 2016 Oleg Ivanov
+ * Licensed under the MIT license.
+ */
+
 package com.oeshiro.qixxy.Screens
 
 import com.badlogic.gdx.graphics.GL20
