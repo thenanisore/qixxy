@@ -6,7 +6,7 @@ The goal is to fence off a supermajority of the playfield while trying to stay a
 
 This project is licensed under [the MIT License](./LICENSE).
 
-## Disclaimers
+## Disclaimer
 
 The app was written as a university project in 2016 as a way to learn some Scala and game development. I don't update or maintain it.
 
